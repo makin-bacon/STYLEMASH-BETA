@@ -173,7 +173,7 @@ export function MergeDialog({
               <select
                 value={targetStyleId}
                 onChange={(e) => handleTargetChange(e.target.value)}
-                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-violet-500 focus:outline-none"
               >
                 <option value="">A new style</option>
                 {userStyles.map((record) => (
@@ -199,7 +199,7 @@ export function MergeDialog({
                     setKind('character')
                     setListFormat('none')
                   }}
-                  className="accent-indigo-600"
+                  className="accent-violet-600"
                 />
                 Character (text formatting)
               </label>
@@ -210,7 +210,7 @@ export function MergeDialog({
                   checked={kind === 'paragraph'}
                   disabled={typeControlsLocked}
                   onChange={() => setKind('paragraph')}
-                  className="accent-indigo-600"
+                  className="accent-violet-600"
                 />
                 Paragraph (list, etc.)
               </label>
@@ -224,7 +224,7 @@ export function MergeDialog({
                 value={listFormat}
                 disabled={typeControlsLocked}
                 onChange={(e) => setListFormat(e.target.value as ListFormat)}
-                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none disabled:bg-soft-2 disabled:text-ink-5"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-violet-500 focus:outline-none disabled:bg-soft-2 disabled:text-ink-5"
               >
                 {LIST_FORMAT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -242,7 +242,7 @@ export function MergeDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+              className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-violet-500 focus:outline-none"
             />
           </label>
 
@@ -253,7 +253,7 @@ export function MergeDialog({
                 type="text"
                 value={fields.fontFamily}
                 onChange={(e) => setFields({ ...fields, fontFamily: e.target.value })}
-                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-violet-500 focus:outline-none"
               />
             </label>
             <label className="block text-sm">
@@ -264,7 +264,7 @@ export function MergeDialog({
                 step="0.5"
                 value={fields.fontSizePt}
                 onChange={(e) => setFields({ ...fields, fontSizePt: e.target.value })}
-                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-violet-500 focus:outline-none"
               />
             </label>
           </div>
@@ -275,7 +275,7 @@ export function MergeDialog({
                 type="checkbox"
                 checked={fields.colorAuto}
                 onChange={(e) => setFields({ ...fields, colorAuto: e.target.checked })}
-                className="accent-indigo-600"
+                className="accent-violet-600"
               />
               Automatic color
             </label>
@@ -295,7 +295,7 @@ export function MergeDialog({
                 type="checkbox"
                 checked={fields.bold}
                 onChange={(e) => setFields({ ...fields, bold: e.target.checked })}
-                className="accent-indigo-600"
+                className="accent-violet-600"
               />
               Bold
             </label>
@@ -304,7 +304,7 @@ export function MergeDialog({
                 type="checkbox"
                 checked={fields.italic}
                 onChange={(e) => setFields({ ...fields, italic: e.target.checked })}
-                className="accent-indigo-600"
+                className="accent-violet-600"
               />
               Italic
             </label>
@@ -313,7 +313,7 @@ export function MergeDialog({
                 type="checkbox"
                 checked={fields.strike}
                 onChange={(e) => setFields({ ...fields, strike: e.target.checked })}
-                className="accent-indigo-600"
+                className="accent-violet-600"
               />
               Strikethrough
             </label>
@@ -355,7 +355,7 @@ export function MergeDialog({
             </button>
             <button
               type="submit"
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+              className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
             >
               {reuseRecord || targetStyleId ? 'Save changes' : 'Create style'}
             </button>

@@ -43,7 +43,7 @@ export function StyleVariantRow({
         indented ? 'pl-8 pr-4' : 'px-4'
       } ${
         selected
-          ? 'border-l-indigo-500 bg-select hover:bg-select-hover active:bg-select-active'
+          ? 'border-l-violet-500 bg-select hover:bg-select-hover active:bg-select-active'
           : 'border-l-transparent bg-surface hover:bg-soft active:bg-soft-2'
       }`}
     >

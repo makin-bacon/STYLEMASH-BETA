@@ -7,12 +7,19 @@
 
 html {
   color-scheme: light;
+  /* Text that sets no color of its own (e.g. document sample text with an
+     "auto" color) inherits this; scrollbars pick up the violet border tone. */
+  color: var(--color-ink);
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+::selection {
+  background: var(--color-select);
 }
 
 html.dark {
-  /* Native scrollbars, form controls and the text-selection color follow. */
+  /* Native scrollbars and form controls follow. */
   color-scheme: dark;
-  color: #e2e8f0;
 }
 
 /* App runs full-viewport height so the two-column workspace can fill the window. */
@@ -54,49 +61,53 @@ body {
 /* ---- Theme tokens --------------------------------------------------
    Every themed color in the app is one of these semantic names (`bg-surface`,
    `text-ink-4`, `border-line`, `bg-select`...), so components never say
-   "slate-200" and never need `dark:` variants. @theme holds the light
+   "violet-200" and never need `dark:` variants. @theme holds the light
    values; `.dark` (below) re-points the same names for dark mode - this is
    the only place colors are defined per theme.
    Groups: canvas/surface/soft/track = backgrounds; line* = borders;
    ink* = text (1 strongest -> 6 faintest); chrome* = the always-dark
-   header/footer/panel-title bars; accent* = links, badges, hovers;
+   header/footer/panel-title bars (chrome-mid = exactly halfway between
+   chrome and the brand violet, for the Current styles title bar); accent* = links, badges, hovers;
    select* = "picked" rows in Current styles; target* = the picked New
-   Styles row; warn/flash/danger/tag-* = status colors. Brand-fixed colors
-   (primary buttons, the violet preview header) intentionally stay on the
-   stock palette - they read the same in both themes. */
+   Styles row; warn/flash/danger/tag-* = status colors; quiet = secondary
+   buttons; brand* = the violet Document Preview title bar (same in both
+   themes). The whole neutral scale is violet-tinted (hue ~285) so the UI
+   reads as one dark-violet family; dark mode is near-black violet. Primary
+   buttons use the stock violet-600/700 directly. */
 @theme {
-  --color-canvas: #f8fafc;
+  --color-canvas: #faf8ff;
   --color-surface: #ffffff;
-  --color-soft: #f8fafc;
-  --color-soft-2: #f1f5f9;
-  --color-track: #e2e8f0;
-  --color-disabled: #cbd5e1;
+  --color-soft: #f6f3fc;
+  --color-soft-2: #efeafa;
+  --color-track: #e6dff5;
+  --color-disabled: #cbc0e3;
   --color-disabled-fg: #ffffff;
-  --color-line: #e2e8f0;
-  --color-line-strong: #cbd5e1;
-  --color-line-hover: #94a3b8;
-  --color-ink: #1e293b;
-  --color-ink-2: #334155;
-  --color-ink-3: #475569;
-  --color-ink-4: #64748b;
-  --color-ink-5: #94a3b8;
-  --color-ink-6: #cbd5e1;
-  --color-chrome: #1e293b;
-  --color-chrome-fg: #e2e8f0;
-  --color-chrome-muted: #94a3b8;
-  --color-chrome-dim: #64748b;
-  --color-chrome-edge: #64748b;
-  --color-chrome-hover: #334155;
-  --color-chrome-hover-2: #475569;
-  --color-accent: #4f46e5;
-  --color-accent-2: #4338ca;
-  --color-accent-3: #3730a3;
-  --color-accent-bg: #eef2ff;
-  --color-accent-bg-2: #e0e7ff;
-  --color-accent-line: #c7d2fe;
-  --color-select: #c7d2fe;
-  --color-select-hover: #a5b4fc;
-  --color-select-active: #818cf8;
+  --color-line: #e5def3;
+  --color-line-strong: #cdc2e6;
+  --color-line-hover: #a598c9;
+  --color-ink: #1d1330;
+  --color-ink-2: #33254d;
+  --color-ink-3: #4d3f6b;
+  --color-ink-4: #6b5e8a;
+  --color-ink-5: #9488b3;
+  --color-ink-6: #cdc5e2;
+  --color-chrome: #150b26;
+  --color-chrome-mid: #30145e;
+  --color-chrome-fg: #ece6fb;
+  --color-chrome-muted: #a99ccf;
+  --color-chrome-dim: #8f80b8;
+  --color-chrome-edge: #6a5a9a;
+  --color-chrome-hover: #2c1f4a;
+  --color-chrome-hover-2: #3d2d66;
+  --color-accent: #7c3aed;
+  --color-accent-2: #6d28d9;
+  --color-accent-3: #5b21b6;
+  --color-accent-bg: #f5f3ff;
+  --color-accent-bg-2: #ede9fe;
+  --color-accent-line: #ddd6fe;
+  --color-select: #ddd6fe;
+  --color-select-hover: #c4b5fd;
+  --color-select-active: #a78bfa;
   --color-target: #fde68a;
   --color-target-hover: #fcd34d;
   --color-target-active: #fbbf24;
@@ -107,41 +118,47 @@ body {
   --color-warn-ink: #92400e;
   --color-flash: #a7f3d0;
   --color-danger: #dc2626;
-  --color-tag-purple: #9333ea;
-  --color-tag-purple-bg: #faf5ff;
+  --color-tag-pink: #c026d3;
+  --color-tag-pink-bg: #fdf4ff;
+  --color-quiet: #5b4b80;
+  --color-quiet-hover: #4a3c6b;
+  --color-brand: #4c1d95;
+  --color-brand-edge: #2e1065;
+  --color-brand-soft: #ddd6fe;
 }
 
 .dark {
-  --color-canvas: #020617;
-  --color-surface: #0f172a;
-  --color-soft: #1e293b;
-  --color-soft-2: #273449;
-  --color-track: #334155;
-  --color-disabled: #273449;
-  --color-disabled-fg: #64748b;
-  --color-line: #334155;
-  --color-line-strong: #475569;
-  --color-line-hover: #64748b;
-  --color-ink: #f1f5f9;
-  --color-ink-2: #e2e8f0;
-  --color-ink-3: #cbd5e1;
-  --color-ink-4: #94a3b8;
-  --color-ink-5: #64748b;
-  --color-ink-6: #475569;
-  --color-chrome: #0b1120;
-  --color-chrome-dim: #8391a7;
-  --color-chrome-edge: #475569;
-  --color-chrome-hover: #1e293b;
-  --color-chrome-hover-2: #273449;
-  --color-accent: #818cf8;
-  --color-accent-2: #a5b4fc;
-  --color-accent-3: #c7d2fe;
-  --color-accent-bg: #1e1b4b;
-  --color-accent-bg-2: #312e81;
-  --color-accent-line: #4338ca;
-  --color-select: #312e81;
-  --color-select-hover: #3730a3;
-  --color-select-active: #4338ca;
+  --color-canvas: #05020b;
+  --color-surface: #0d0718;
+  --color-soft: #150d26;
+  --color-soft-2: #1e1436;
+  --color-track: #2a1d4a;
+  --color-disabled: #241a3d;
+  --color-disabled-fg: #6b5c93;
+  --color-line: #2a1d47;
+  --color-line-strong: #3d2c66;
+  --color-line-hover: #55418a;
+  --color-ink: #f4f0ff;
+  --color-ink-2: #e6dffa;
+  --color-ink-3: #cdc3ea;
+  --color-ink-4: #a99ccf;
+  --color-ink-5: #7d6ea8;
+  --color-ink-6: #4d3f78;
+  --color-chrome: #09040f;
+  --color-chrome-mid: #2a1052;
+  --color-chrome-dim: #8474b0;
+  --color-chrome-edge: #4a3a78;
+  --color-chrome-hover: #22163c;
+  --color-chrome-hover-2: #2f2054;
+  --color-accent: #a78bfa;
+  --color-accent-2: #c4b5fd;
+  --color-accent-3: #ddd6fe;
+  --color-accent-bg: #1a0f38;
+  --color-accent-bg-2: #2e1b5e;
+  --color-accent-line: #5b3aa8;
+  --color-select: #3b2378;
+  --color-select-hover: #4a2d92;
+  --color-select-active: #5b3aa8;
   --color-target: #78350f;
   --color-target-hover: #92400e;
   --color-target-active: #b45309;
@@ -151,8 +168,10 @@ body {
   --color-warn-ink: #fcd34d;
   --color-flash: #064e3b;
   --color-danger: #f87171;
-  --color-tag-purple: #c084fc;
-  --color-tag-purple-bg: #3b0764;
+  --color-tag-pink: #e879f9;
+  --color-tag-pink-bg: #4a044e;
+  --color-quiet: #3a2966;
+  --color-quiet-hover: #4a3380;
 }
 
 /* ---- Theme switch -------------------------------------------------- */
@@ -294,14 +313,14 @@ body .sm-tour .driver-popover-footer-btn:active {
 }
 
 body .sm-tour .driver-popover-next-btn {
-  background: #4f46e5;
+  background: #7c3aed;
   border-color: transparent;
   color: #fff;
 }
 
 body .sm-tour .driver-popover-next-btn:hover,
 body .sm-tour .driver-popover-next-btn:focus-visible {
-  background: #4338ca;
+  background: #6d28d9;
 }
 
 body .sm-tour .sm-tour-skip {
@@ -352,10 +371,10 @@ body .sm-tour .driver-popover-arrow-side-bottom {
 @keyframes sm-tour-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(129 140 248 / 0);
+    box-shadow: 0 0 0 0 rgb(167 139 250 / 0);
   }
   50% {
-    box-shadow: 0 0 0 5px rgb(129 140 248 / 0.28);
+    box-shadow: 0 0 0 5px rgb(167 139 250 / 0.3);
   }
 }
 

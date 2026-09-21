@@ -104,7 +104,7 @@ function UserStyleRow({
               e.stopPropagation()
               onMergeSelectedIntoTarget()
             }}
-            className="mt-2 rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700"
+            className="mt-2 rounded-md bg-violet-600 px-2 py-1 text-xs font-medium text-white hover:bg-violet-700"
           >
             Merge {pendingSelectionCount} selected here
           </button>
@@ -118,7 +118,7 @@ function UserStyleRow({
           </span>
         )}
         {record.kind === 'paragraph' && (
-          <span className="rounded-full bg-tag-purple-bg px-2 py-0.5 text-xs font-medium text-tag-purple">
+          <span className="rounded-full bg-tag-pink-bg px-2 py-0.5 text-xs font-medium text-tag-pink">
             {record.listFormat === 'bullet'
               ? 'Bulleted list'
               : record.listFormat === 'decimal'

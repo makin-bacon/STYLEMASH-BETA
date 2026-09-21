@@ -42,7 +42,7 @@ export function AttachReferenceDocButton({ status, errorMessage, onAttach }: Att
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={status === 'loading'}
-        className="w-full rounded-md bg-slate-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
+        className="w-full rounded-md bg-quiet px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-quiet-hover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
       >
         {status === 'loading' ? 'Reading reference document…' : 'Attach custom Word styles'}
       </button>

@@ -207,7 +207,7 @@ export function DocumentPreviewPanel({
           text baseline as the title - and, since the title is the taller
           item, the title itself stays exactly where it sits in the sibling
           panels' headers. min-h-15 keeps the bar at the shared height. */}
-      <div className="flex min-h-15 items-baseline justify-between gap-2 border-b border-violet-950 bg-violet-900 px-4 py-4">
+      <div className="flex min-h-15 items-baseline justify-between gap-2 border-b border-brand-edge bg-brand px-4 py-4">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-white">
           Document Preview
           <InfoTooltip
@@ -217,7 +217,7 @@ export function DocumentPreviewPanel({
         {/* min-w-0 + truncate: on a narrow window the hint clips instead of
             wrapping, so the header can never grow past its shared height. */}
         <span
-          className="min-w-0 truncate text-xs text-violet-200"
+          className="min-w-0 truncate text-xs text-brand-soft"
           title={`Click text to select a style (Hold ${MULTI_SELECT_KEY} to select multiple)`}
         >
           Click text to select a style (Hold {MULTI_SELECT_KEY} to select multiple)
@@ -273,7 +273,7 @@ export function DocumentPreviewPanel({
                             isFlashed
                               ? 'bg-flash ring-2 ring-emerald-400'
                               : isHighlighted
-                                ? 'bg-select ring-2 ring-indigo-400'
+                                ? 'bg-select ring-2 ring-violet-400'
                                 : 'bg-transparent'
                           }`}
                         >
@@ -295,7 +295,7 @@ export function DocumentPreviewPanel({
             disabled={isMergingContent || referenceDoc.status !== 'loaded'}
             aria-hidden={referenceDoc.status !== 'loaded'}
             tabIndex={referenceDoc.status === 'loaded' ? 0 : -1}
-            className={`rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg ${
+            className={`rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg ${
               referenceDoc.status === 'loaded' ? '' : 'invisible'
             }`}
           >

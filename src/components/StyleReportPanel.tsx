@@ -102,7 +102,7 @@ export function StyleReportPanel({
   const allMatched = mergeProgress.total > 0 && mergeProgress.remaining === 0
   return (
     <div data-tour="current-styles" className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
-      <div className="flex min-h-15 items-start justify-between gap-2 border-b border-line bg-chrome px-4 py-4">
+      <div className="flex min-h-15 items-start justify-between gap-2 border-b border-line bg-chrome-mid px-4 py-4">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-chrome-fg">
           Current styles <span className="font-normal text-chrome-muted">({styleReport.length})</span>
           <InfoTooltip text="Select items from this list and you'll see them in your document. Now either merge these with a newly created style or one from an uploaded reference Word file in the &quot;New&quot; styles list." />
@@ -208,7 +208,7 @@ export function StyleReportPanel({
               onChange={(e) => {
                 if (e.target.checked) onSelectMatchingReferenceStyles()
               }}
-              className="accent-indigo-600"
+              className="accent-violet-600"
             />
             Select styles matching Document B
           </label>
@@ -234,7 +234,7 @@ export function StyleReportPanel({
           </div>
           <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-track">
             <div
-              className="h-full rounded-full bg-indigo-500 transition-[width]"
+              className="h-full rounded-full bg-violet-500 transition-[width]"
               style={{ width: `${percentMerged}%` }}
             />
           </div>
@@ -251,7 +251,7 @@ export function StyleReportPanel({
             type="button"
             disabled={selectedIds.size === 0}
             onClick={onMergeSelected}
-            className="flex-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
+            className="flex-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
           >
             Mash it {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
           </button>
