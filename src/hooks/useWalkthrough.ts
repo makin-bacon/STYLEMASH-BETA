@@ -20,7 +20,7 @@ const START_DELAY_MS: Record<WalkthroughKind, number> = { landing: 600, workspac
  * mid-tour (e.g. a file is dropped during the intro) the tour is torn down.
  *
  * Returns `restartWalkthrough`, which replays whichever phase matches the
- * current screen - the header's Help button calls it. It does nothing while a
+ * current screen - the header's Walkthrough button calls it. It does nothing while a
  * file is mid-load (there's nothing on screen to point at). */
 export function useWalkthrough(status: WorkspaceStatus) {
   const activeRef = useRef<WalkthroughHandle | null>(null)

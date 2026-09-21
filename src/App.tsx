@@ -29,7 +29,7 @@ function App() {
   // Light/dark - lives here (not in the footer that renders the switch) so
   // the choice survives any remount and stays one instance for the app.
   const { isDark, toggle: toggleTheme } = useTheme()
-  // Guided tour: starts itself on first run, and the header's Help button
+  // Guided tour: starts itself on first run, and the header's Walkthrough button
   // replays it via `restartWalkthrough`.
   const { restartWalkthrough } = useWalkthrough(state.status)
   // Whether UserStylesPanel's DefaultStylesChecklist is expanded - toggled
@@ -79,7 +79,7 @@ function App() {
   return (
     <div className="flex h-full flex-col bg-canvas">
       <AppHeader
-        onHelp={restartWalkthrough}
+        onWalkthrough={restartWalkthrough}
         filename={isLoaded ? (state.parsedDocx?.originalFilename ?? null) : null}
         isCustomizeOpen={isCustomizeOpen}
         onToggleCustomize={() => setIsCustomizeOpen((v) => !v)}

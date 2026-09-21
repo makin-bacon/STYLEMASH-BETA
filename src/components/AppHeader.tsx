@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { AboutModal } from './AboutModal'
+
 interface AppHeaderProps {
   filename: string | null
   /** Whether the "Customise your own style file" checklist is currently
@@ -7,16 +10,19 @@ interface AppHeaderProps {
    * button and the panel it controls are siblings. */
   isCustomizeOpen: boolean
   onToggleCustomize: () => void
-  /** "Help" starts the guided tour for the current screen (see
-   * useWalkthrough#restartWalkthrough) - it is the app's only help. */
-  onHelp: () => void
+  /** "Walkthrough" starts the guided tour for the current screen (see
+   * useWalkthrough#restartWalkthrough). The neighbouring "About" button opens
+   * the written About modal instead, whose open state lives here. */
+  onWalkthrough: () => void
 }
 
-/** Top bar: app name, currently-loaded filename, Help, and "Customise your
- * own style file". The "load a different file" action lives on
+/** Top bar: app name, currently-loaded filename, "Customise your own style
+ * file", Walkthrough (guided tour) and About (modal). The "load a different file" action lives on
  * StyleReportPanel's header instead of here - see StyleReportPanel's
  * "Mash a different file" button. */
-export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize, onHelp }: AppHeaderProps) {
+export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize, onWalkthrough }: AppHeaderProps) {
+  const [isAboutOpen, setIsAboutOpen] = useState(false)
+
   return (
     <header className="flex items-center justify-between border-b border-line bg-chrome px-6 py-3">
       <div>
@@ -63,13 +69,22 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize, onHelp
         )}
         <button
           type="button"
-          onClick={onHelp}
+          onClick={onWalkthrough}
           title="Take a quick guided tour"
           className="rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg hover:bg-chrome-hover"
         >
-          Help
+          Walkthrough
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsAboutOpen(true)}
+          className="rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg hover:bg-chrome-hover"
+        >
+          About
         </button>
       </div>
+
+      {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
     </header>
   )
 }

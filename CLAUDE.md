@@ -1189,3 +1189,40 @@ Per request, once the tour was signed off the old written help was deleted:
   `onOpenHelp` test; `appHeader.interaction.test.tsx` no longer asserts on the
   modal. Build, tests and lint pass. (Not re-verified in a browser - the Chrome
   extension was still disconnected.)
+
+### 2026-09-21 - "About" button + modal (written overview, user-editable text)
+*(branch `feature/about-modal`, stacked on the unmerged `feature/help-starts-tour`)*
+
+New **About** button in the header, immediately right of **Help** (Help = guided
+tour, About = written text). It opens `AboutModal` - the old help modal
+restored from git history (`d6513a7^:src/components/HelpModal.tsx`) and renamed
+- with the same dialog chrome (heading "About", scrollable body, Close). The
+modal's open state lives in `AppHeader`.
+
+- **The text is a plain file the owner edits directly:** `src/content/about-content.md`
+  (imported with Vite's `?raw`, parsed once at module load). Format: first
+  `# ` line = the title shown under the modal heading; each `## ` starts a
+  section; **blank lines separate paragraphs** (consecutive lines are joined into
+  one paragraph - so put a blank line between numbered items); a block whose every
+  line starts with `- ` renders as a bullet list. No JSX, no escaping.
+- **Content** was written from `README.md`'s user-facing parts (what it is,
+  privacy, supported formats, scope limits, the "needs repair" note, workflow) plus
+  the details the five-step tour doesn't carry (the two ways to merge, Customise
+  defaults, attaching Document B, undo/clear/start over, saving, light/dark).
+  README's developer sections (Node install, scripts, troubleshooting) are
+  deliberately left out - they are not for in-app readers.
+- Tests: `appHeader.interaction.test.tsx` gained an About case (button sits right
+  after Help; opens; Close closes) asserting on the modal's own `<h2>About</h2>`
+  rather than the editable text, so wording edits won't break it. 123 tests total.
+- Verified in Chrome: button placement, modal render, all 12 sections, the two
+  numbered merge steps as separate paragraphs, Close.
+
+### 2026-09-21 - "Help" button relabelled "Walkthrough"
+*(same branch, `feature/about-modal`)*
+
+The header button that replays the guided tour now reads **Walkthrough** (About
+is still to its right). `AppHeader`'s `onHelp` prop became `onWalkthrough` so the
+code matches the UI; comments, tests, `README.md` step 10 and the "Getting
+started" paragraph in `src/content/about-content.md` updated. **Older changelog
+entries above still say "Help button" - that is the same button under its old
+name.** The tooltip ("Take a quick guided tour") is unchanged. 123 tests pass.

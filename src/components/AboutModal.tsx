@@ -1,0 +1,111 @@
+import aboutContentRaw from '../content/about-content.md?raw'
+
+interface AboutModalProps {
+  onClose: () => void
+}
+
+/** One chunk of a section's body: an ordinary paragraph, or a "- " bulleted
+ * list (the one bit of structure beyond plain prose the content file uses -
+ * see about-content.md's "New Styles" section). */
+type AboutBlock = { kind: 'paragraph'; text: string } | { kind: 'list'; items: string[] }
+
+interface AboutSection {
+  heading: string
+  blocks: AboutBlock[]
+}
+
+/** Splits one heading's worth of raw text (already isolated by the caller)
+ * into blocks on blank lines - a chunk where every line starts with "- "
+ * becomes a list block, anything else becomes a paragraph (its own line
+ * breaks collapsed to spaces, since the content file wraps prose at
+ * whatever width is convenient to edit, not for display). */
+function toBlocks(text: string): AboutBlock[] {
+  return text
+    .trim()
+    .split(/\n{2,}/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk): AboutBlock => {
+      const lines = chunk.split('\n').map((l) => l.trim())
+      if (lines.every((l) => l.startsWith('- '))) {
+        return { kind: 'list', items: lines.map((l) => l.slice(2).trim()) }
+      }
+      return { kind: 'paragraph', text: lines.join(' ') }
+    })
+}
+
+/** Parses about-content.md's plain "# title" / "## heading" / blank-line
+ * paragraph (plus the occasional "- " list) structure into data this
+ * component can render - the whole point of keeping the copy in its own
+ * file (see that file's own intent) is that anyone editing StyleMash's About
+ * text only ever touches plain prose, never this component's JSX. */
+function parseAboutContent(raw: string): { title: string; intro: AboutBlock[]; sections: AboutSection[] } {
+  const [introBlock, ...sectionBlocks] = raw.trim().split(/\n(?=## )/)
+  const introLines = introBlock.split('\n')
+  const title = (introLines[0] ?? '').replace(/^#\s*/, '').trim()
+  const intro = toBlocks(introLines.slice(1).join('\n'))
+
+  const sections = sectionBlocks.map((block) => {
+    const lines = block.split('\n')
+    const heading = (lines[0] ?? '').replace(/^##\s*/, '').trim()
+    return { heading, blocks: toBlocks(lines.slice(1).join('\n')) }
+  })
+
+  return { title, intro, sections }
+}
+
+function AboutBlocks({ blocks }: { blocks: AboutBlock[] }) {
+  return (
+    <>
+      {blocks.map((block, i) =>
+        block.kind === 'list' ? (
+          <ul key={i} className="list-disc space-y-1 pl-5">
+            {block.items.map((item, j) => (
+              <li key={j}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p key={i}>{block.text}</p>
+        ),
+      )}
+    </>
+  )
+}
+
+const { title, intro, sections } = parseAboutContent(aboutContentRaw)
+
+/** About modal, opened from AppHeader's "About" button (the "Walkthrough" button next
+ * to it starts the guided tour instead). All the actual text lives in
+ * src/content/about-content.md, not here - this component only supplies the
+ * dialog chrome (heading, scroll area, Close button) and a small parser (see
+ * parseAboutContent above) that turns that file's plain "# / ## /
+ * blank-line-paragraph" structure into rendered sections. Parsed once at
+ * module load, not per-render, since the content is static. */
+export function AboutModal({ onClose }: AboutModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-lg rounded-lg bg-surface p-5 shadow-xl">
+        <h2 className="text-3xl font-semibold text-ink">About</h2>
+        <div className="mt-3 max-h-[60vh] space-y-3 overflow-y-auto text-sm text-ink-3">
+          <h3 className="text-2xl font-semibold text-ink">{title}</h3>
+          <AboutBlocks blocks={intro} />
+          {sections.map((section) => (
+            <div key={section.heading} className="space-y-2">
+              <h4 className="text-lg font-semibold text-ink">{section.heading}</h4>
+              <AboutBlocks blocks={section.blocks} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
