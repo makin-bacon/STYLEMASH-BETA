@@ -57,7 +57,7 @@ export function DropzoneUpload({ onFileAccepted, errorMessage }: DropzoneUploadP
         role="button"
         tabIndex={0}
         className={`flex w-full max-w-lg cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
-          isDragActive ? 'border-indigo-500 bg-accent-bg' : 'border-line-strong bg-surface hover:border-line-hover'
+          isDragActive ? 'border-violet-500 bg-accent-bg' : 'border-line-strong bg-surface hover:border-line-hover'
         }`}
       >
         <p className="text-lg font-semibold text-ink-2">Drop a Word document here</p>

@@ -1060,3 +1060,38 @@ button yet - by request, pending sign-off.**)*
   hands off to the workspace tour → all four steps, Back rewinds, Skip tour and
   Done both end it cleanly (overlay + body classes removed, flags set), dark
   theme popover, tour survives 10 s idle.
+
+### 2026-09-21 — Violet theme, as dark as possible
+*(branch `feature/violet-theme`, stacked on `feature/guided-tour`, not yet merged)*
+
+The UI was slate-based with a violet Document Preview title bar; the whole
+palette is now one violet family. Because every themed color is a token in
+`src/index.css` (`@theme` = light, `.dark` = dark), this was mostly re-tinting
+those values:
+
+- **Neutral scale re-tinted to violet (hue ~285)** - surfaces, borders, ink,
+  chrome. **Dark mode is near-black violet** (`canvas #05020b`, `surface
+  #0d0718`, chrome `#09040f`); light mode is pale violet tints with deep-violet
+  chrome bars. Contrast checked with a script (body ink 9-17:1, muted ink
+  4-8:1, white on violet-600 5.7:1).
+- **Accent/selection moved indigo → violet** (`accent*`, `select*`, and every
+  literal `indigo-*` class in components → `violet-*`: primary buttons, focus
+  borders, native checkbox/radio `accent-`, progress bar, the tour's Next
+  button and pulse ring).
+- **New tokens:** `brand`/`brand-edge`/`brand-soft` (the Document Preview title
+  bar - `violet-900`, identical in both themes so it stays the brightest violet
+  on screen), `quiet`/`quiet-hover` (secondary buttons, e.g. "Attach custom
+  Word styles", replacing `bg-slate-600`). **Renamed:** `tag-purple*` →
+  `tag-pink*` (fuchsia, so the "Numbered list" pill doesn't blend with the
+  violet accent). The amber "target" row and status colors (warn/flash/danger)
+  are deliberately left alone - they need to read as different from violet.
+- `html` now sets `color: var(--color-ink)` (auto-color sample text inherits a
+  violet-black/near-white instead of pure black/white), plus violet
+  `scrollbar-color` and `::selection`.
+- Theme switch recolored to violet (day track `violet-800→700`, night
+  `black→violet-950`, violet clouds, white/violet-100 knob).
+- **"As dark as possible" caveat:** light mode still exists and is (by nature)
+  light; the darkest look is dark mode. Making dark the first-visit default
+  (instead of following the OS setting) is a one-line change in `useTheme.ts`
+  + `index.html` if wanted.
+- Build, 116 tests, lint pass; eyeballed in Chrome in both modes.

@@ -100,7 +100,7 @@ export function HelpModal({ onClose }: HelpModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+            className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
           >
             Close
           </button>

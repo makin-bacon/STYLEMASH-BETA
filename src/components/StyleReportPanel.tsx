@@ -208,7 +208,7 @@ export function StyleReportPanel({
               onChange={(e) => {
                 if (e.target.checked) onSelectMatchingReferenceStyles()
               }}
-              className="accent-indigo-600"
+              className="accent-violet-600"
             />
             Select styles matching Document B
           </label>
@@ -234,7 +234,7 @@ export function StyleReportPanel({
           </div>
           <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-track">
             <div
-              className="h-full rounded-full bg-indigo-500 transition-[width]"
+              className="h-full rounded-full bg-violet-500 transition-[width]"
               style={{ width: `${percentMerged}%` }}
             />
           </div>
@@ -251,7 +251,7 @@ export function StyleReportPanel({
             type="button"
             disabled={selectedIds.size === 0}
             onClick={onMergeSelected}
-            className="flex-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
+            className="flex-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
           >
             Mash it {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
           </button>

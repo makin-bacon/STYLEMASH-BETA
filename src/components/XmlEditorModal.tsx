@@ -31,7 +31,7 @@ export function XmlEditorModal({ variant, error, onApply, onCancel }: XmlEditorM
           onChange={(e) => setText(e.target.value)}
           spellCheck={false}
           rows={12}
-          className="mt-3 w-full rounded-md border border-line-strong bg-soft p-2 font-mono text-xs text-ink focus:border-indigo-500 focus:outline-none"
+          className="mt-3 w-full rounded-md border border-line-strong bg-soft p-2 font-mono text-xs text-ink focus:border-violet-500 focus:outline-none"
         />
 
         {error && <p className="mt-2 text-sm text-danger">{error}</p>}
@@ -47,7 +47,7 @@ export function XmlEditorModal({ variant, error, onApply, onCancel }: XmlEditorM
           <button
             type="button"
             onClick={() => onApply(text)}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+            className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
           >
             Apply
           </button>

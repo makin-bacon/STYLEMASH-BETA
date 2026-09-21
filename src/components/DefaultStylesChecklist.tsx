@@ -40,7 +40,7 @@ function DefaultStyleRow({
     <li
       onClick={() => onToggle(def.name)}
       className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-line px-4 py-3 transition-colors last:border-b-0 ${
-        checked ? 'border-l-indigo-500 bg-surface hover:bg-soft' : 'border-l-transparent bg-soft/60 hover:bg-soft'
+        checked ? 'border-l-violet-500 bg-surface hover:bg-soft' : 'border-l-transparent bg-soft/60 hover:bg-soft'
       }`}
     >
       <FaCheckbox

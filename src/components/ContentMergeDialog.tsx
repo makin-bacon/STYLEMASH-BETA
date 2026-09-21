@@ -49,7 +49,7 @@ export function ContentMergeDialog({
                 name="keepOriginalFormatting"
                 checked={keepOriginalFormatting}
                 onChange={() => setKeepOriginalFormatting(true)}
-                className="mt-0.5 accent-indigo-600"
+                className="mt-0.5 accent-violet-600"
               />
               <span>
                 Keep original formatting
@@ -62,7 +62,7 @@ export function ContentMergeDialog({
                 name="keepOriginalFormatting"
                 checked={!keepOriginalFormatting}
                 onChange={() => setKeepOriginalFormatting(false)}
-                className="mt-0.5 accent-indigo-600"
+                className="mt-0.5 accent-violet-600"
               />
               <span>
                 Snap to Document B&rsquo;s style of the same name, where one exists
@@ -93,7 +93,7 @@ export function ContentMergeDialog({
             <button
               type="submit"
               disabled={isMerging}
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
+              className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
             >
               {isMerging ? 'Merging…' : 'Merge & download'}
             </button>

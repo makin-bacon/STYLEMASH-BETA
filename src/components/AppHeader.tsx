@@ -57,7 +57,7 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize }: AppH
             aria-pressed={isCustomizeOpen}
             className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
               isCustomizeOpen
-                ? 'border-indigo-400 bg-indigo-600 text-white hover:bg-indigo-700'
+                ? 'border-violet-400 bg-violet-600 text-white hover:bg-violet-700'
                 : 'border-chrome-edge text-chrome-fg hover:bg-chrome-hover'
             }`}
           >
