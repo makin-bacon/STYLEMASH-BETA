@@ -949,7 +949,8 @@ styles"/"in New Styles"), which now also documents click-to-select.
   with the light surfaces) - hence named tokens.
 - **Switch** (`ThemeToggle.tsx`, footer bottom-right; `useTheme.ts`): slate +
   white only. Knob slides with a small overshoot, sun ↔ moon spin/scale, track
-  eases pale → deep slate, stars twinkle in / clouds out. State is a `dark`
+  eases mid → deep slate (day track is `slate-600→500` with `slate-400` clouds,
+  darkened from the first pass at the user's request; sun knob stays white), stars twinkle in / clouds out. State is a `dark`
   class on `<html>`, saved to `localStorage['stylemash-theme']`, falling back
   to `prefers-color-scheme`; an inline script in `index.html` applies it
   before first paint (no white flash). Theme changes **cross-fade** via a

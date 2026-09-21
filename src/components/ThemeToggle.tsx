@@ -8,7 +8,7 @@ interface ThemeToggleProps {
 
 /** Light/dark switch, in the app's own palette (slate + white only). All
  * motion is CSS keyed off `isDark`: the knob slides with a small overshoot,
- * the sun spins out as the moon spins in, the track eases from pale to deep
+ * the sun spins out as the moon spins in, the track eases from mid to deep
  * slate, and a few stars fade in and twinkle (a pair of soft clouds fades
  * out). Reduced-motion users get the same end states with no movement - see
  * `.theme-toggle` in index.css. */
@@ -23,8 +23,8 @@ export function ThemeToggle({ isDark, onToggle }: ThemeToggleProps) {
       onClick={onToggle}
       className="theme-toggle relative h-7 w-14 shrink-0 cursor-pointer overflow-hidden rounded-full border border-chrome-edge focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-chrome"
     >
-      {/* Track: pale slate underneath, deep slate fading in on top. */}
-      <span className="absolute inset-0 bg-linear-to-r from-slate-300 to-slate-200" aria-hidden="true" />
+      {/* Track: mid slate underneath, deep slate fading in on top (day = dark-ish, night = darker). */}
+      <span className="absolute inset-0 bg-linear-to-r from-slate-600 to-slate-500" aria-hidden="true" />
       <span
         className={`absolute inset-0 bg-linear-to-r from-slate-950 to-slate-800 transition-opacity duration-500 ${
           isDark ? 'opacity-100' : 'opacity-0'
@@ -34,13 +34,13 @@ export function ThemeToggle({ isDark, onToggle }: ThemeToggleProps) {
 
       {/* Clouds (day only), on the side the knob has left. */}
       <span
-        className={`absolute right-1.5 top-3.5 h-2 w-4 rounded-full bg-white/90 transition-all duration-500 ${
+        className={`absolute right-1.5 top-3.5 h-2 w-4 rounded-full bg-slate-400 transition-all duration-500 ${
           isDark ? 'translate-x-3 opacity-0' : 'opacity-100'
         }`}
         aria-hidden="true"
       />
       <span
-        className={`absolute right-4 top-1.5 h-1.5 w-3 rounded-full bg-white/70 transition-all delay-75 duration-500 ${
+        className={`absolute right-4 top-1.5 h-1.5 w-3 rounded-full bg-slate-400/80 transition-all delay-75 duration-500 ${
           isDark ? 'translate-x-3 opacity-0' : 'opacity-100'
         }`}
         aria-hidden="true"
