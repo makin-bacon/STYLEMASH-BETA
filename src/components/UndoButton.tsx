@@ -7,7 +7,7 @@ interface UndoButtonProps {
  * selections into a style ("Mash it"/"+ New Style"), "Merge N selected
  * here", the Document B bulk match, or "Clear list" - by popping one
  * snapshot off useDocxWorkspace's undo stack. Disabled once that stack is
- * empty. Rendered in StyleReportPanel's footer, immediately left of
+ * empty. Rendered in UserStylesPanel's footer, immediately left of
  * "Mash it". */
 export function UndoButton({ disabled, onUndo }: UndoButtonProps) {
   return (

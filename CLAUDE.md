@@ -1105,3 +1105,30 @@ deepest. If `brand` or `chrome` change, recompute `chrome-mid` by hand - it is a
 literal, not derived. Measured in Chrome (both themes): headers render as
 `rgb(76,29,149)` / `rgb(48,20,94)` / `rgb(21,11,38)` (light) and
 `rgb(76,29,149)` / `rgb(42,16,82)` / `rgb(9,4,15)` (dark).
+
+### 2026-09-21 - Undo / Mash it / Save your file moved to the bottom of New Styles
+*(branch `feature/actions-in-new-styles`, not yet merged)*
+
+The three action buttons now live in `UserStylesPanel`'s footer instead of
+`StyleReportPanel`'s. New Styles footer, top to bottom: `[Clear list | Attach
+custom Word styles]` row, then `[Undo | Mash it (N)]`, then a full-width
+`Save your file`. Current styles' footer keeps only the "N of M merged"
+progress bar (and its header keeps "Mash a different file"; the "Save your
+work" link in its all-matched empty state still calls `onSave`).
+
+- **Props moved:** `UserStylesPanel` gained `onMashIt`, `canUndo`, `onUndo`,
+  `onSave`, `isSaving` (Mash it's enabled state / count reuses the existing
+  `pendingSelectionCount`). `StyleReportPanel` lost `onMergeSelected`,
+  `isSaving`, `canUndo`, `onUndo` (kept `onSave`). `App.tsx#onMashIt` is
+  unchanged - merge into the picked target, else open MergeDialog.
+- **Walkthrough:** the `data-tour="mash-footer"` anchor moved with the
+  buttons (now inside the New Styles panel), step 4 popover now opens on the
+  *left* of it (`side: 'left'`) and reads "Down here, Mash it folds your
+  selection into the target style (Undo is right beside it)...". Step order
+  unchanged. README + `help-content.md` wording updated ("bottom of New
+  Styles"); doc comments on `UndoButton`/`SaveButton` fixed.
+- Build, 116 tests, lint pass. Verified in Chrome: tour step 4 spotlights the
+  new location; select preview text + pick "Normal" as target + Mash it ->
+  merged (1 of 19, Normal 1x), Mash it disables, Undo enables; Undo reverts to
+  0 of 19; Save present. (One JS read taken immediately after the click briefly
+  showed a stale "Mash it (1)" - a read-before-render artifact, gone after 1 s.)

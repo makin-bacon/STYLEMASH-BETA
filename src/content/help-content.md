@@ -30,8 +30,8 @@ Click "Edit" on any New Styles entry later to change its look.
 
 There are two ways to merge selected entries into a style:
 
-1. Select one or more entries in Current styles, then click a style's row in New Styles to mark it as the target - its background turns amber to show it is picked. Click "Merge N selected here" on that row, or click "Mash it" in Current styles, which does the same thing once a target is already picked. This merges immediately, with no extra dialog.
-2. Select one or more entries in Current styles and click "Mash it" without picking a target first. A dialog opens where you can either create a brand-new style on the spot or pick an existing one from New Styles, then confirm.
+1. Select one or more entries in Current styles, then click a style's row in New Styles to mark it as the target - its background turns amber to show it is picked. Click "Merge N selected here" on that row, or click "Mash it" at the bottom of New Styles, which does the same thing once a target is already picked. This merges immediately, with no extra dialog.
+2. Select one or more entries in Current styles and click "Mash it" (bottom of New Styles) without picking a target first. A dialog opens where you can either create a brand-new style on the spot or pick an existing one from New Styles, then confirm.
 
 Either way, every selected entry's text is re-styled to match the target style, which now covers that formatting wherever it appears in the document.
 
@@ -45,11 +45,11 @@ If you already have a clean, approved Word document with the styles you want eve
 
 ## Undo, clearing, and starting over
 
-"Undo", next to "Mash it", reverts the most recent merge, one step at a time. "Clear list" wipes every New Styles entry you have created this session. "Mash a different file" takes you back to the upload screen to start over with a new document.
+"Undo", next to "Mash it" at the bottom of New Styles, reverts the most recent merge, one step at a time. "Clear list" wipes every New Styles entry you have created this session. "Mash a different file" takes you back to the upload screen to start over with a new document.
 
 ## Saving your result
 
-Click "Save your file" at any time to download the cleaned document. It keeps the original file format and filename, with "-RIPPED" appended - for example, Report.docx becomes Report-RIPPED.docx. Saving does not end your session; keep merging and save again whenever you like.
+Click "Save your file" (bottom of New Styles) at any time to download the cleaned document. It keeps the original file format and filename, with "-RIPPED" appended - for example, Report.docx becomes Report-RIPPED.docx. Saving does not end your session; keep merging and save again whenever you like.
 
 ## Light and dark mode
 
