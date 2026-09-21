@@ -102,7 +102,7 @@ export function StyleReportPanel({
   const allMatched = mergeProgress.total > 0 && mergeProgress.remaining === 0
   return (
     <div data-tour="current-styles" className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
-      <div className="flex min-h-15 items-start justify-between gap-2 border-b border-line bg-chrome px-4 py-4">
+      <div className="flex min-h-15 items-start justify-between gap-2 border-b border-line bg-chrome-mid px-4 py-4">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-chrome-fg">
           Current styles <span className="font-normal text-chrome-muted">({styleReport.length})</span>
           <InfoTooltip text="Select items from this list and you'll see them in your document. Now either merge these with a newly created style or one from an uploaded reference Word file in the &quot;New&quot; styles list." />

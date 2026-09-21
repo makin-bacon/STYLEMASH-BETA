@@ -66,7 +66,8 @@ body {
    the only place colors are defined per theme.
    Groups: canvas/surface/soft/track = backgrounds; line* = borders;
    ink* = text (1 strongest -> 6 faintest); chrome* = the always-dark
-   header/footer/panel-title bars; accent* = links, badges, hovers;
+   header/footer/panel-title bars (chrome-mid = exactly halfway between
+   chrome and the brand violet, for the Current styles title bar); accent* = links, badges, hovers;
    select* = "picked" rows in Current styles; target* = the picked New
    Styles row; warn/flash/danger/tag-* = status colors; quiet = secondary
    buttons; brand* = the violet Document Preview title bar (same in both
@@ -91,6 +92,7 @@ body {
   --color-ink-5: #9488b3;
   --color-ink-6: #cdc5e2;
   --color-chrome: #150b26;
+  --color-chrome-mid: #30145e;
   --color-chrome-fg: #ece6fb;
   --color-chrome-muted: #a99ccf;
   --color-chrome-dim: #8f80b8;
@@ -143,6 +145,7 @@ body {
   --color-ink-5: #7d6ea8;
   --color-ink-6: #4d3f78;
   --color-chrome: #09040f;
+  --color-chrome-mid: #2a1052;
   --color-chrome-dim: #8474b0;
   --color-chrome-edge: #4a3a78;
   --color-chrome-hover: #22163c;

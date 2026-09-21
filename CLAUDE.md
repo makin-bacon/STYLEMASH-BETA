@@ -1095,3 +1095,13 @@ those values:
   (instead of following the OS setting) is a one-line change in `useTheme.ts`
   + `index.html` if wanted.
 - Build, 116 tests, lint pass; eyeballed in Chrome in both modes.
+
+#### Follow-up: "Current styles" header sits halfway between its neighbours
+New token `chrome-mid` = the exact midpoint between `brand` (Document Preview
+bar, `#4c1d95`) and `chrome` (New Styles bar) *per theme*: light `#30145e`
+(chrome `#150b26`), dark `#2a1052` (chrome `#09040f`). Used only by
+`StyleReportPanel`'s header, so the three title bars step brand violet → mid →
+deepest. If `brand` or `chrome` change, recompute `chrome-mid` by hand - it is a
+literal, not derived. Measured in Chrome (both themes): headers render as
+`rgb(76,29,149)` / `rgb(48,20,94)` / `rgb(21,11,38)` (light) and
+`rgb(76,29,149)` / `rgb(42,16,82)` / `rgb(9,4,15)` (dark).
