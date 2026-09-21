@@ -1216,3 +1216,13 @@ modal's open state lives in `AppHeader`.
   rather than the editable text, so wording edits won't break it. 123 tests total.
 - Verified in Chrome: button placement, modal render, all 12 sections, the two
   numbered merge steps as separate paragraphs, Close.
+
+### 2026-09-21 - "Help" button relabelled "Walkthrough"
+*(same branch, `feature/about-modal`)*
+
+The header button that replays the guided tour now reads **Walkthrough** (About
+is still to its right). `AppHeader`'s `onHelp` prop became `onWalkthrough` so the
+code matches the UI; comments, tests, `README.md` step 10 and the "Getting
+started" paragraph in `src/content/about-content.md` updated. **Older changelog
+entries above still say "Help button" - that is the same button under its old
+name.** The tooltip ("Take a quick guided tour") is unchanged. 123 tests pass.

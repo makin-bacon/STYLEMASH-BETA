@@ -74,7 +74,7 @@ function AboutBlocks({ blocks }: { blocks: AboutBlock[] }) {
 
 const { title, intro, sections } = parseAboutContent(aboutContentRaw)
 
-/** About modal, opened from AppHeader's "About" button (the "Help" button next
+/** About modal, opened from AppHeader's "About" button (the "Walkthrough" button next
  * to it starts the guided tour instead). All the actual text lives in
  * src/content/about-content.md, not here - this component only supplies the
  * dialog chrome (heading, scroll area, Close button) and a small parser (see

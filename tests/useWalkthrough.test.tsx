@@ -110,7 +110,7 @@ describe('useWalkthrough', () => {
     m.unmount()
   })
 
-  it('restartWalkthrough (the Help button) replays the intro on the upload screen even if already seen', () => {
+  it('restartWalkthrough (the Walkthrough button) replays the intro on the upload screen even if already seen', () => {
     recordWalkthroughEnd('landing', 'skipped')
     const m = mount('empty')
     act(() => void vi.advanceTimersByTime(2000))

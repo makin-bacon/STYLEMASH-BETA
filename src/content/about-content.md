@@ -8,7 +8,7 @@ Everything happens in your browser. Your document is never uploaded, transmitted
 
 ## Getting started
 
-Drag a .docx or .dotx file onto the window, or click to browse for one. StyleMash reads it and switches straight to the workspace - nothing else to configure first. Click "Help" at the top right at any time to replay the short guided tour.
+Drag a .docx or .dotx file onto the window, or click to browse for one. StyleMash reads it and switches straight to the workspace - nothing else to configure first. Click "Walkthrough" at the top right at any time to replay the short guided tour.
 
 ## Supported formats and limits
 

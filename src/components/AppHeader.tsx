@@ -10,17 +10,17 @@ interface AppHeaderProps {
    * button and the panel it controls are siblings. */
   isCustomizeOpen: boolean
   onToggleCustomize: () => void
-  /** "Help" starts the guided tour for the current screen (see
+  /** "Walkthrough" starts the guided tour for the current screen (see
    * useWalkthrough#restartWalkthrough). The neighbouring "About" button opens
    * the written About modal instead, whose open state lives here. */
-  onHelp: () => void
+  onWalkthrough: () => void
 }
 
 /** Top bar: app name, currently-loaded filename, "Customise your own style
- * file", Help (guided tour) and About (modal). The "load a different file" action lives on
+ * file", Walkthrough (guided tour) and About (modal). The "load a different file" action lives on
  * StyleReportPanel's header instead of here - see StyleReportPanel's
  * "Mash a different file" button. */
-export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize, onHelp }: AppHeaderProps) {
+export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize, onWalkthrough }: AppHeaderProps) {
   const [isAboutOpen, setIsAboutOpen] = useState(false)
 
   return (
@@ -69,11 +69,11 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize, onHelp
         )}
         <button
           type="button"
-          onClick={onHelp}
+          onClick={onWalkthrough}
           title="Take a quick guided tour"
           className="rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg hover:bg-chrome-hover"
         >
-          Help
+          Walkthrough
         </button>
         <button
           type="button"
