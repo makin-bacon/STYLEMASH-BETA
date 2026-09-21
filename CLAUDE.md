@@ -1243,3 +1243,17 @@ mode). Contrast checked: muted text ~6:1 and green ~9:1 on the band, both themes
 v3 hex `#4ade80`, so a hand-typed token would NOT have matched - use the utility.
 Also: a `*/` inside a CSS comment (I wrote `tag-*/progress`) ends the comment
 early and breaks the Tailwind build - avoid it in `index.css` comments.
+
+#### Follow-up: Document Preview header = Current styles header
+*(same branch, `feature/progress-footer`)*
+
+The Document Preview title bar now uses `bg-chrome-mid` - identical to Current
+styles' bar (and its progress band) - with the same `border-line`, title
+`text-chrome-fg` (was white) and hint `text-chrome-muted` (was violet-200).
+Measured in Chrome: both bars `rgb(48,20,94)` (light) / `rgb(42,16,82)` (dark),
+all three headers still 60px. Only New Styles' bar stays deeper (`chrome`).
+**The `brand`/`brand-edge`/`brand-soft` tokens were removed** (nothing used
+them any more), so the earlier entries that call `chrome-mid` "halfway between
+brand and chrome" are history: `chrome-mid` is now just a literal violet
+(`#30145e` light / `#2a1052` dark) shared by those two bars and the progress
+band. Edit it in one place (`index.css`) to retune all three at once.
