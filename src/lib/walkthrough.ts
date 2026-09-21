@@ -20,19 +20,13 @@ const STORAGE_KEYS: Record<WalkthroughKind, string> = {
 
 const target = (name: string) => `[data-tour="${name}"]`
 
-/** Closing-step link to the written help (a button, wired up in
- * runWalkthrough's onPopoverRender via its `data-open-help` attribute). */
-const HELP_LINK =
-  '<p class="sm-tour-more">Want the details? <button type="button" class="sm-tour-link" data-open-help>Read the full help</button></p>'
-
 export const LANDING_STEPS: DriveStep[] = [
   {
     element: target('dropzone'),
     popover: {
       title: 'Start with a Word file',
       description:
-        "Drop a <strong>.docx</strong> or <strong>.dotx</strong> here, or click to browse. It's read right in your browser - nothing is uploaded. We'll show you around once it's open." +
-        HELP_LINK,
+        "Drop a <strong>.docx</strong> or <strong>.dotx</strong> here, or click to browse. It's read right in your browser - nothing is uploaded. We'll show you around once it's open.",
       side: 'bottom',
       align: 'center',
     },
@@ -74,8 +68,7 @@ export const WORKSPACE_STEPS: DriveStep[] = [
     popover: {
       title: 'Mash it, then save',
       description:
-        "Down here, <strong>Mash it</strong> folds your selection into the target style (<strong>Undo</strong> is right beside it). Repeat until you're happy, then <strong>Save your file</strong>." +
-        HELP_LINK,
+        "Down here, <strong>Mash it</strong> folds your selection into the target style (<strong>Undo</strong> is right beside it). Repeat until you're happy, then <strong>Save your file</strong>.",
       side: 'left',
       align: 'end',
     },
@@ -113,7 +106,7 @@ export function recordWalkthroughEnd(kind: WalkthroughKind, reason: WalkthroughE
 }
 
 /** `?tour` in the URL forces the tour to run regardless of what's been seen -
- * for reviewing/demoing it (and a handy hook until the Help button is wired). */
+ * for reviewing/demoing it. (The header's Help button replays it too.) */
 export function isWalkthroughForced(): boolean {
   return typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('tour')
 }
@@ -132,7 +125,6 @@ export interface WalkthroughHandle {
 export function runWalkthrough(
   kind: WalkthroughKind,
   onEnd: (reason: WalkthroughEnd) => void,
-  options: { onOpenHelp?: () => void } = {},
 ): WalkthroughHandle {
   const steps = kind === 'landing' ? LANDING_STEPS : WORKSPACE_STEPS
   const isSingleStep = steps.length === 1
@@ -180,19 +172,6 @@ export function runWalkthrough(
     overlayClickBehavior: () => {},
     onDestroyStarted: () => finish('skipped'),
     onPopoverRender: (popover, { driver: d }) => {
-      // The closing step's "Read the full help" link: ends the tour (counted
-      // as completed - they got to the end) and opens the written help.
-      const helpLink = popover.description.querySelector('[data-open-help]')
-      if (helpLink) {
-        if (options.onOpenHelp) {
-          helpLink.addEventListener('click', () => {
-            finish('completed')
-            options.onOpenHelp?.()
-          })
-        } else {
-          helpLink.parentElement?.remove()
-        }
-      }
       // An explicit "Skip tour" link on every step but the last, alongside the
       // X and Esc, so leaving is never more than one obvious click away.
       if (isSingleStep || !d.hasNextStep()) return

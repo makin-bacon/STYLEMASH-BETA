@@ -8,8 +8,7 @@ interface AppHeaderProps {
   isCustomizeOpen: boolean
   onToggleCustomize: () => void
   /** "Help" starts the guided tour for the current screen (see
-   * useWalkthrough#restartWalkthrough). The written help modal is reached from
-   * the tour's closing step, not from here. */
+   * useWalkthrough#restartWalkthrough) - it is the app's only help. */
   onHelp: () => void
 }
 

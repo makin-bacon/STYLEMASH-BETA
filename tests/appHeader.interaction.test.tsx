@@ -6,7 +6,7 @@ import { AppHeader } from '../src/components/AppHeader'
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 describe('AppHeader Help button', () => {
-  it('calls onHelp (starts the tour) and does not open the help modal itself', () => {
+  it('calls onHelp (starts the tour) when clicked', () => {
     const container = document.createElement('div')
     document.body.appendChild(container)
     const root = createRoot(container)
@@ -19,7 +19,6 @@ describe('AppHeader Help button', () => {
     const help = Array.from(container.querySelectorAll('button')).find((b) => b.textContent === 'Help')!
     act(() => help.click())
     expect(onHelp).toHaveBeenCalledOnce()
-    expect(document.body.textContent).not.toContain('Welcome to StyleMash')
     act(() => root.unmount())
     container.remove()
   })

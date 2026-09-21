@@ -16,10 +16,9 @@ import { hasSeenWalkthrough, recordWalkthroughEnd } from '../src/lib/walkthrough
 type Status = 'empty' | 'loading' | 'loaded' | 'error'
 
 let restart: (() => void) | undefined
-const onOpenHelp = vi.fn()
 
 function Harness({ status }: { status: Status }) {
-  restart = useWalkthrough(status, { onOpenHelp }).restartWalkthrough
+  restart = useWalkthrough(status).restartWalkthrough
   return null
 }
 
@@ -43,7 +42,6 @@ describe('useWalkthrough', () => {
     window.history.replaceState(null, '', '/')
     destroy = vi.fn()
     runWalkthrough.mockReset()
-    onOpenHelp.mockReset()
     restart = undefined
     runWalkthrough.mockReturnValue({ destroy })
   })
@@ -151,15 +149,6 @@ describe('useWalkthrough', () => {
     const m = mount('error')
     act(() => void vi.advanceTimersByTime(700))
     expect(runWalkthrough.mock.calls[0][0]).toBe('landing')
-    m.unmount()
-  })
-
-  it('hands the tour an onOpenHelp that calls the app-provided opener', () => {
-    const m = mount('empty')
-    act(() => void vi.advanceTimersByTime(700))
-    const options = runWalkthrough.mock.calls[0][2] as { onOpenHelp?: () => void }
-    options.onOpenHelp!()
-    expect(onOpenHelp).toHaveBeenCalledOnce()
     m.unmount()
   })
 })

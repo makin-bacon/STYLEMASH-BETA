@@ -4,7 +4,6 @@ import { AppHeader } from './components/AppHeader'
 import { ContentMergeDialog } from './components/ContentMergeDialog'
 import { DocumentPreviewPanel } from './components/DocumentPreviewPanel'
 import { DropzoneUpload } from './components/DropzoneUpload'
-import { HelpModal } from './components/HelpModal'
 import { MergeDialog } from './components/MergeDialog'
 import { StyleReportPanel } from './components/StyleReportPanel'
 import { UserStylesPanel } from './components/UserStylesPanel'
@@ -30,14 +29,9 @@ function App() {
   // Light/dark - lives here (not in the footer that renders the switch) so
   // the choice survives any remount and stays one instance for the app.
   const { isDark, toggle: toggleTheme } = useTheme()
-  // The written help text. Not opened by the header's Help button (that starts
-  // the tour) but by the tour's closing "Read the full help" link.
-  const [isHelpOpen, setIsHelpOpen] = useState(false)
   // Guided tour: starts itself on first run, and the header's Help button
   // replays it via `restartWalkthrough`.
-  const { restartWalkthrough } = useWalkthrough(state.status, {
-    onOpenHelp: () => setIsHelpOpen(true),
-  })
+  const { restartWalkthrough } = useWalkthrough(state.status)
   // Whether UserStylesPanel's DefaultStylesChecklist is expanded - toggled
   // by AppHeader's "Customise your own style file" button, a sibling of the
   // panel it controls, so this lives here rather than in either component.
@@ -207,8 +201,6 @@ function App() {
           )}
         </div>
       )}
-
-      {isHelpOpen && <HelpModal onClose={() => setIsHelpOpen(false)} />}
 
       <AppFooter isDark={isDark} onToggleTheme={toggleTheme} />
     </div>

@@ -14,12 +14,6 @@ type WorkspaceStatus = 'empty' | 'loading' | 'loaded' | 'error'
 // spotlight lands on elements that are fully in place.
 const START_DELAY_MS: Record<WalkthroughKind, number> = { landing: 600, workspace: 900 }
 
-interface WalkthroughOptions {
-  /** Opens the written help; wired to the tour's closing "Read the full help"
-   * link. Without it, that link is left out. */
-  onOpenHelp?: () => void
-}
-
 /** First-run guided tour. Starts by itself, once each, the first time the
  * user sees the upload screen and the first time a document opens; skipping
  * or finishing is remembered (see lib/walkthrough.ts). If the screen changes
@@ -28,23 +22,15 @@ interface WalkthroughOptions {
  * Returns `restartWalkthrough`, which replays whichever phase matches the
  * current screen - the header's Help button calls it. It does nothing while a
  * file is mid-load (there's nothing on screen to point at). */
-export function useWalkthrough(status: WorkspaceStatus, options: WalkthroughOptions = {}) {
+export function useWalkthrough(status: WorkspaceStatus) {
   const activeRef = useRef<WalkthroughHandle | null>(null)
-  // Read through a ref so a new callback identity each render doesn't restart
-  // the tour (the effect below depends on `start`).
-  const onOpenHelpRef = useRef(options.onOpenHelp)
-  onOpenHelpRef.current = options.onOpenHelp
 
   const start = useCallback((kind: WalkthroughKind) => {
     activeRef.current?.destroy()
-    activeRef.current = runWalkthrough(
-      kind,
-      (reason) => {
-        activeRef.current = null
-        recordWalkthroughEnd(kind, reason)
-      },
-      { onOpenHelp: onOpenHelpRef.current ? () => onOpenHelpRef.current?.() : undefined },
-    )
+    activeRef.current = runWalkthrough(kind, (reason) => {
+      activeRef.current = null
+      recordWalkthroughEnd(kind, reason)
+    })
   }, [])
 
   useEffect(() => {
