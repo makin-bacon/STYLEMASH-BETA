@@ -220,7 +220,7 @@ export function StyleReportPanel({
         <div className="py-2">
           <div className="flex items-center justify-between text-xs text-chrome-muted">
             <span>
-              {mergeProgress.merged} of {mergeProgress.total} merged into a User-Created style
+              {mergeProgress.merged} of {mergeProgress.total} merged into a user-created style
             </span>
             <span className="font-medium text-chrome-fg">{mergeProgress.remaining} left</span>
           </div>
