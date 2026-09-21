@@ -1257,3 +1257,15 @@ them any more), so the earlier entries that call `chrome-mid` "halfway between
 brand and chrome" are history: `chrome-mid` is now just a literal violet
 (`#30145e` light / `#2a1052` dark) shared by those two bars and the progress
 band. Edit it in one place (`index.css`) to retune all three at once.
+
+### 2026-09-22 - "Save your file" button is the progress-bar green
+*(branch `feature/save-button-green`, not yet merged)*
+
+`SaveButton` moved from `bg-emerald-600`/white text to **`bg-green-400`** - the
+same class as the merge-progress fill in Current styles and the "BETA" tag - with
+`enabled:hover:bg-green-300`. **Text is now dark (`text-chrome`, semibold), not
+white:** white on this green is only ~1.8:1, dark violet is ~11:1 in both themes.
+Disabled state unchanged (`bg-disabled`/`text-disabled-fg`). Doc comment updated.
+Build/tests/lint pass; **not eyeballed in a browser** (Chrome extension was
+disconnected) - worth a quick look at the button (esp. the hover shade) in both
+themes.
