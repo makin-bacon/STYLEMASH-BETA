@@ -69,7 +69,7 @@ body {
    header/footer/panel-title bars (chrome-mid = exactly halfway between
    chrome and the brand violet, for the Current styles title bar); accent* = links, badges, hovers;
    select* = "picked" rows in Current styles; target* = the picked New
-   Styles row; warn/flash/danger/tag-* = status colors; quiet = secondary
+   Styles row; warn, flash, danger and the tag colors = status colors; quiet = secondary
    buttons; brand* = the violet Document Preview title bar (same in both
    themes). The whole neutral scale is violet-tinted (hue ~285) so the UI
    reads as one dark-violet family; dark mode is near-black violet. Primary
