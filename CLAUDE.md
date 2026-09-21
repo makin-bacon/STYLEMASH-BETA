@@ -1132,3 +1132,36 @@ work" link in its all-matched empty state still calls `onSave`).
   merged (1 of 19, Normal 1x), Mash it disables, Undo enables; Undo reverts to
   0 of 19; Save present. (One JS read taken immediately after the click briefly
   showed a stale "Mash it (1)" - a read-before-render artifact, gone after 1 s.)
+
+### 2026-09-21 - Help button now starts the guided tour
+*(branch `feature/help-starts-tour`, not yet merged)*
+
+The header's **Help** button no longer opens the written-help modal; it calls
+`restartWalkthrough()` from `useWalkthrough`, which replays the tour for the
+current screen (upload-screen intro, or the four-step workspace tour once a
+document is open) even if the user has already seen or skipped it. It does
+nothing while a file is mid-load (`status === 'loading'`, nothing to point at);
+`status === 'error'` counts as the upload screen. A tour already running is
+replaced, not stacked.
+
+- **The written help isn't orphaned:** `HelpModal` state moved from `AppHeader`
+  up to `App.tsx`, and the *closing step of each tour* (the intro's single step
+  and workspace step 4) ends with a "Want the details? **Read the full help**"
+  line (`HELP_LINK` in `walkthrough.ts`, `data-open-help`, styled `.sm-tour-more`
+  / `.sm-tour-link`). Clicking it ends the tour as *completed* and opens the
+  modal. `runWalkthrough` takes `{ onOpenHelp }`; without one the link is
+  removed from the popover. `useWalkthrough(status, { onOpenHelp })` reads the
+  callback through a ref so a fresh function each render can't restart a tour.
+- `AppHeader` lost its local modal and got an `onHelp` prop; the button has a
+  "Take a quick guided tour" tooltip. `README.md` step 10 updated (`?tour` is
+  still supported to force the tour).
+- Tests 116 -> 125: hook restart cases (replay when already seen, workspace
+  phase, replaces a running tour, ignored while loading, error = intro, help
+  callback wiring); `tests/walkthroughHelpLink.test.ts` runs the *real*
+  driver.js in jsdom to check the link completes the tour + opens help (and is
+  omitted with no handler); `tests/appHeader.interaction.test.tsx`.
+- **Not verified in a real browser:** the Chrome extension was disconnected for
+  this change, so the Help-button -> tour -> "Read the full help" -> modal flow
+  has only been exercised by tests (including real driver.js under jsdom), not
+  by eye. Worth a quick manual pass: click Help on the upload screen and again
+  with a document open; follow the closing link.

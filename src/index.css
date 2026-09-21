@@ -338,6 +338,27 @@ body .sm-tour .sm-tour-skip:focus-visible {
   text-decoration: underline;
 }
 
+/* "Read the full help" line on the closing steps. */
+body .sm-tour .sm-tour-more {
+  margin: 10px 0 0;
+  color: var(--color-ink-4);
+  font-size: 12px;
+}
+
+body .sm-tour .sm-tour-link {
+  all: unset;
+  cursor: pointer;
+  color: var(--color-accent);
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+body .sm-tour .sm-tour-link:hover,
+body .sm-tour .sm-tour-link:focus-visible {
+  color: var(--color-accent-2);
+  text-decoration: underline;
+}
+
 /* Arrow: only the side that points at the target is coloured. */
 body .sm-tour .driver-popover-arrow-side-left {
   border-left-color: var(--color-surface);

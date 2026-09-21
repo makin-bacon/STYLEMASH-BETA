@@ -4,6 +4,8 @@ StyleMash cleans up messy Word documents by finding every distinct text style al
 
 Everything happens in your browser. Your document is never uploaded or sent anywhere; closing the tab is the only "delete" you need.
 
+Tip: click "Help" at the top right at any time to replay the short guided tour. You are reading the full written help, which the tour links to on its last step.
+
 ## Getting started
 
 Drag a .docx or .dotx file onto the window, or click to browse for one. StyleMash reads it and switches straight to the workspace - nothing else to configure first.

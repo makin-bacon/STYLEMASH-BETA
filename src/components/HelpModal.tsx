@@ -74,7 +74,8 @@ function HelpBlocks({ blocks }: { blocks: HelpBlock[] }) {
 
 const { title, intro, sections } = parseHelpContent(helpContentRaw)
 
-/** Help modal, opened from AppHeader's "Help" button. All the actual
+/** Help modal, opened from the guided tour's "Read the full help" link (the
+ * header's "Help" button starts the tour itself). All the actual
  * walkthrough copy lives in src/content/help-content.md, not here - this
  * component only supplies the dialog chrome (heading, scroll area, Close
  * button) and a small parser (see parseHelpContent above) that turns that
