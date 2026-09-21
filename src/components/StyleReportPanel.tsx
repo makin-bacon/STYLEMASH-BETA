@@ -212,17 +212,21 @@ export function StyleReportPanel({
         </div>
       )}
 
-      <div className="border-t border-line px-4 py-2">
+      {/* Same background as this panel's title bar (`chrome-mid`), so the panel
+          is bracketed top and bottom by one colour: light-on-dark text, a
+          darker recessed track, and a bright green fill - `green-400`, the exact
+          same green as the "BETA" tag in the page title (AppHeader). */}
+      <div className="border-t border-line bg-chrome-mid px-4 py-2">
         <div className="py-2">
-          <div className="flex items-center justify-between text-xs text-ink-4">
+          <div className="flex items-center justify-between text-xs text-chrome-muted">
             <span>
               {mergeProgress.merged} of {mergeProgress.total} merged into a User-Created style
             </span>
-            <span>{mergeProgress.remaining} left</span>
+            <span className="font-medium text-chrome-fg">{mergeProgress.remaining} left</span>
           </div>
-          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-track">
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-chrome">
             <div
-              className="h-full rounded-full bg-violet-500 transition-[width]"
+              className="h-full rounded-full bg-green-400 transition-[width]"
               style={{ width: `${percentMerged}%` }}
             />
           </div>

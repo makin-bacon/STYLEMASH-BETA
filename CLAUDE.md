@@ -1226,3 +1226,34 @@ code matches the UI; comments, tests, `README.md` step 10 and the "Getting
 started" paragraph in `src/content/about-content.md` updated. **Older changelog
 entries above still say "Help button" - that is the same button under its old
 name.** The tooltip ("Take a quick guided tour") is unchanged. 123 tests pass.
+
+### 2026-09-21 - Current styles progress footer matches its header; bright green fill
+*(branch `feature/progress-footer`, not yet merged)*
+
+The "N of M merged into a User-Created style" band at the bottom of the Current
+styles panel (`StyleReportPanel.tsx`) now uses the same `bg-chrome-mid` as that
+panel's title bar, so the panel is bracketed top and bottom by one colour. Text
+moved to the light-on-dark chrome tokens (label `text-chrome-muted`, the "N left"
+count `text-chrome-fg` + medium weight), the track is a darker recess
+(`bg-chrome`), and the fill is **`bg-green-400` - deliberately the same class as
+the "BETA" tag in `AppHeader`**, per request (measured in Chrome: both compute to
+`oklch(0.792 0.209 151.711)`; footer and header both `rgb(48, 20, 94)` in light
+mode). Contrast checked: muted text ~6:1 and green ~9:1 on the band, both themes.
+*Gotcha:* Tailwind v4's `green-400` is an oklch value that is brighter than the
+v3 hex `#4ade80`, so a hand-typed token would NOT have matched - use the utility.
+Also: a `*/` inside a CSS comment (I wrote `tag-*/progress`) ends the comment
+early and breaks the Tailwind build - avoid it in `index.css` comments.
+
+#### Follow-up: Document Preview header = Current styles header
+*(same branch, `feature/progress-footer`)*
+
+The Document Preview title bar now uses `bg-chrome-mid` - identical to Current
+styles' bar (and its progress band) - with the same `border-line`, title
+`text-chrome-fg` (was white) and hint `text-chrome-muted` (was violet-200).
+Measured in Chrome: both bars `rgb(48,20,94)` (light) / `rgb(42,16,82)` (dark),
+all three headers still 60px. Only New Styles' bar stays deeper (`chrome`).
+**The `brand`/`brand-edge`/`brand-soft` tokens were removed** (nothing used
+them any more), so the earlier entries that call `chrome-mid` "halfway between
+brand and chrome" are history: `chrome-mid` is now just a literal violet
+(`#30145e` light / `#2a1052` dark) shared by those two bars and the progress
+band. Edit it in one place (`index.css`) to retune all three at once.

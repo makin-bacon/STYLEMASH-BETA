@@ -66,12 +66,12 @@ body {
    the only place colors are defined per theme.
    Groups: canvas/surface/soft/track = backgrounds; line* = borders;
    ink* = text (1 strongest -> 6 faintest); chrome* = the always-dark
-   header/footer/panel-title bars (chrome-mid = exactly halfway between
-   chrome and the brand violet, for the Current styles title bar); accent* = links, badges, hovers;
+   header/footer/panel-title bars (chrome-mid = a lighter violet used by
+   the Document Preview and Current styles title bars and the progress
+   band; a literal, not derived); accent* = links, badges, hovers;
    select* = "picked" rows in Current styles; target* = the picked New
-   Styles row; warn/flash/danger/tag-* = status colors; quiet = secondary
-   buttons; brand* = the violet Document Preview title bar (same in both
-   themes). The whole neutral scale is violet-tinted (hue ~285) so the UI
+   Styles row; warn, flash, danger and the tag colors = status colors; quiet = secondary
+   buttons. The whole neutral scale is violet-tinted (hue ~285) so the UI
    reads as one dark-violet family; dark mode is near-black violet. Primary
    buttons use the stock violet-600/700 directly. */
 @theme {
@@ -122,9 +122,6 @@ body {
   --color-tag-pink-bg: #fdf4ff;
   --color-quiet: #5b4b80;
   --color-quiet-hover: #4a3c6b;
-  --color-brand: #4c1d95;
-  --color-brand-edge: #2e1065;
-  --color-brand-soft: #ddd6fe;
 }
 
 .dark {

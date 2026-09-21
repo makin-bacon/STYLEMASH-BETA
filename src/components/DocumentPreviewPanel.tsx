@@ -202,13 +202,14 @@ export function DocumentPreviewPanel({
 
   return (
     <div data-tour="preview" className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
-      {/* Dark violet title bar with white text. `items-baseline` (not the
+      {/* Title bar in the same `chrome-mid` violet as the Current styles bar.
+          `items-baseline` (not the
           other panels' `items-start`) puts the right-hand hint on the same
           text baseline as the title - and, since the title is the taller
           item, the title itself stays exactly where it sits in the sibling
           panels' headers. min-h-15 keeps the bar at the shared height. */}
-      <div className="flex min-h-15 items-baseline justify-between gap-2 border-b border-brand-edge bg-brand px-4 py-4">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-white">
+      <div className="flex min-h-15 items-baseline justify-between gap-2 border-b border-line bg-chrome-mid px-4 py-4">
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-chrome-fg">
           Document Preview
           <InfoTooltip
             text={`${parsedDocx?.originalFilename ?? 'Live preview'} — This is a "style only" preview of your document. It will not display your page flow correctly but that's OK, that's not what this tool is for. To merge your style with approved styles, use the panels to the right.`}
@@ -217,7 +218,7 @@ export function DocumentPreviewPanel({
         {/* min-w-0 + truncate: on a narrow window the hint clips instead of
             wrapping, so the header can never grow past its shared height. */}
         <span
-          className="min-w-0 truncate text-xs text-brand-soft"
+          className="min-w-0 truncate text-xs text-chrome-muted"
           title={`Click text to select a style (Hold ${MULTI_SELECT_KEY} to select multiple)`}
         >
           Click text to select a style (Hold {MULTI_SELECT_KEY} to select multiple)
