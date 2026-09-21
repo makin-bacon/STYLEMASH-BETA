@@ -67,7 +67,7 @@ function App() {
   // here" button does, with no dialog detour. Only fall back to
   // MergeDialog (define a brand-new style, or pick one there instead) when
   // no target is selected - "Mash it" itself stays disabled until at least
-  // one Style Report entry is selected either way (see StyleReportPanel).
+  // one Style Report entry is selected either way (see UserStylesPanel, where the button now lives).
   const onMashIt = () => {
     if (state.selectedTargetStyleId) {
       actions.mergeSelectedIntoTarget()
@@ -117,16 +117,12 @@ function App() {
                 selectedIds={state.selectedVariantIds}
                 paragraphMarkers={paragraphMarkers}
                 onToggleSelect={actions.toggleSelectVariant}
-                onMergeSelected={onMashIt}
                 hasReferenceStyles={importedStyleCount > 0}
                 bulkMergeError={state.bulkMergeError}
                 onSelectMatchingReferenceStyles={actions.selectVariantsMatchingReferenceStyles}
                 onBulkMergeMatched={actions.bulkMergeMatchedToReference}
                 mergeProgress={mergeProgress}
                 onSave={actions.save}
-                isSaving={state.isSaving}
-                canUndo={state.undoStack.length > 0}
-                onUndo={actions.undo}
                 onRipAnotherFile={actions.reset}
               />
             </div>
@@ -147,6 +143,11 @@ function App() {
                 onAttachReferenceDoc={actions.loadReferenceDoc}
                 onRemoveReferenceDoc={actions.removeReferenceDoc}
                 onClearUserStyles={actions.clearUserStyles}
+                onMashIt={onMashIt}
+                canUndo={state.undoStack.length > 0}
+                onUndo={actions.undo}
+                onSave={actions.save}
+                isSaving={state.isSaving}
                 isCustomizeOpen={isCustomizeOpen}
                 enabledDefaultStyleNames={enabledDefaultStyleNames}
                 onToggleDefaultStyleEnabled={actions.toggleDefaultStyleEnabled}

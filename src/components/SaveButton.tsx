@@ -8,7 +8,7 @@ interface SaveButtonProps {
 /** Always-available save action. Downloads the (possibly edited) document
  * locally in its original format, filename suffixed with "-RIPPED" - never
  * uploads anything anywhere, since StyleMash does all processing
- * client-side in the browser. Rendered in StyleReportPanel's footer, below
+ * client-side in the browser. Rendered in UserStylesPanel's footer, below
  * the Undo/"Mash it" row. */
 export function SaveButton({ disabled, isSaving, onSave, className = '' }: SaveButtonProps) {
   return (

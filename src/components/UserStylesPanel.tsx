@@ -8,6 +8,8 @@ import { countOccurrencesForStyleId } from '../lib/ooxml/styleReport'
 import { signatureToCss } from '../lib/signatureToCss'
 import { USER_STYLE_CATEGORIES, groupUserStylesByCategory, type UserStyleCategory } from '../lib/userStyleCategories'
 import { AttachReferenceDocButton } from './AttachReferenceDocButton'
+import { SaveButton } from './SaveButton'
+import { UndoButton } from './UndoButton'
 import { DefaultStylesChecklist } from './DefaultStylesChecklist'
 import { FaCheckbox } from './FaCheckbox'
 import { InfoTooltip } from './InfoTooltip'
@@ -231,6 +233,15 @@ interface UserStylesPanelProps {
    * go. Pushes its own undo snapshot (see useDocxWorkspace), so an accidental
    * click is recoverable via the Undo button. */
   onClearUserStyles: () => void
+  /** "Mash it": merges the current selection into the picked target style, or
+   * opens the merge dialog when no target is picked (see App.tsx#onMashIt).
+   * Disabled until something is selected (`pendingSelectionCount`). */
+  onMashIt: () => void
+  /** Drives the Undo button beside "Mash it" (see useDocxWorkspace's undoStack). */
+  canUndo: boolean
+  onUndo: () => void
+  onSave: () => void
+  isSaving: boolean
   /** Whether AppHeader's "Customise your own style file" button has this
    * panel's DefaultStylesChecklist expanded - see that component's own doc
    * comment for why it lives here rather than in a separate modal. */
@@ -268,6 +279,11 @@ export function UserStylesPanel({
   onAttachReferenceDoc,
   onRemoveReferenceDoc,
   onClearUserStyles,
+  onMashIt,
+  canUndo,
+  onUndo,
+  onSave,
+  isSaving,
   isCustomizeOpen,
   enabledDefaultStyleNames,
   onToggleDefaultStyleEnabled,
@@ -384,6 +400,29 @@ export function UserStylesPanel({
             />
           )}
         </div>
+      </div>
+
+      {/* The merge actions live here, at the bottom of the panel where the
+          workflow ends: pick text -> pick a target above -> Mash it -> Save.
+          Undo sits immediately left of "Mash it" (undoing the last merge and
+          staging the next are the same gesture); Save is a full-width row of
+          its own, since it's a step you take once you're done merging. This
+          panel only mounts once a document is loaded (see App.tsx), so Save
+          is never gated on document state - SaveButton's own `isSaving`
+          disables it mid-download. */}
+      <div data-tour="mash-footer" className="border-t border-line px-4 py-2">
+        <div className="flex gap-2">
+          <UndoButton disabled={!canUndo} onUndo={onUndo} />
+          <button
+            type="button"
+            disabled={pendingSelectionCount === 0}
+            onClick={onMashIt}
+            className="flex-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
+          >
+            Mash it {pendingSelectionCount > 0 ? `(${pendingSelectionCount})` : ''}
+          </button>
+        </div>
+        <SaveButton disabled={false} isSaving={isSaving} onSave={onSave} className="mt-2 w-full" />
       </div>
     </div>
   )

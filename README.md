@@ -59,15 +59,15 @@ That's it — StyleMash is now running entirely on your machine. No account, no 
 
 1. **Drag and drop** a `.docx` or `.dotx` file onto the browser window (or click to browse for one).
 2. StyleMash reads the document and shows **Current styles** (middle panel), next to a **Document Preview** (left panel) of the text: every distinct text appearance it found, most common first, each with a live preview, its resolved attributes (font, size, color, bold/italic/underline/strikethrough), and where it came from (a named style, or direct formatting with no style at all).
-3. **Select** one or more entries (click a row, or its checkbox — or click the text itself in the Document Preview: a plain click selects just that style, Ctrl/Cmd-click adds more) and click **Mash it** to fold them into a single named style — pick an existing style to merge into, or create a new one.
+3. **Select** one or more entries (click a row, or its checkbox — or click the text itself in the Document Preview: a plain click selects just that style, Ctrl/Cmd-click adds more) and click **Mash it** (bottom of the New Styles panel) to fold them into a single named style — pick an existing style to merge into, or create a new one.
 4. Or build the target list first: use **+ New Style** in the **New Styles** panel (right) to define a style from scratch, or **+ Defaults** to populate it with a bundled set of common starter styles (headings, bulleted/numbered lists, Normal, and a few text styles). Click **Edit** on any of them to tweak its look later.
 5. Only want some of the bundled defaults? Click **Customise your own style file** in the top header to pick which ones "+ Defaults" brings in, grouped by type (Headings, Bulleted Lists, Numbered Lists, Text Styles) — or download the underlying reference Word file from that same panel to build your own variant in Word.
 6. Prefer merging straight into a specific style? Click that style's row in **New Styles** to mark it as the target, select entries in Current styles, then click **Merge N selected here** on the target row — no dialog needed.
 7. Have a second, already-clean Word file with the styles you want to standardize on? Use **Attach custom Word styles** (New Styles panel footer) to import its style definitions as additional merge targets, tagged "from Document B". **Remove Document B** detaches it again — any of its styles you never actually merged into are removed with it.
-8. **Undo** (Current styles panel footer, left of "Mash it") reverts the most recent merge or **Clear list**, one step at a time.
+8. **Undo** (New Styles panel footer, left of "Mash it") reverts the most recent merge or **Clear list**, one step at a time.
 9. Prefer the lights off? The switch at the bottom right of the page toggles light/dark mode (remembered between visits; the first visit follows your OS setting).
 10. First time here? A short guided tour (five steps, skippable and rewindable) runs on your first visit. Add `?tour` to the URL (e.g. `http://localhost:5173/?tour`) to replay it.
-11. Click **Save your file** (Current styles panel footer) at any time to download the result. The file keeps its original format and filename, with `-RIPPED` appended (e.g. `Report.docx` → `Report-RIPPED.docx`).
+11. Click **Save your file** (New Styles panel footer) at any time to download the result. The file keeps its original format and filename, with `-RIPPED` appended (e.g. `Report.docx` → `Report-RIPPED.docx`).
 
 **Supported formats**: `.docx` and `.dotx` only (Office Open XML). Legacy `.doc` (pre-2007 binary format) isn't supported. Headers, footers, and footnotes/endnotes aren't scanned in this version — only the main document body.
 

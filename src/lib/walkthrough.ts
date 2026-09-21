@@ -68,8 +68,8 @@ export const WORKSPACE_STEPS: DriveStep[] = [
     popover: {
       title: 'Mash it, then save',
       description:
-        "<strong>Mash it</strong> folds your selection into the target style (<strong>Undo</strong> is right beside it). Repeat until you're happy, then <strong>Save your file</strong>.",
-      side: 'right',
+        "Down here, <strong>Mash it</strong> folds your selection into the target style (<strong>Undo</strong> is right beside it). Repeat until you're happy, then <strong>Save your file</strong>.",
+      side: 'left',
       align: 'end',
     },
   },
