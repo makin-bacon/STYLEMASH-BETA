@@ -14,7 +14,7 @@ Only .docx and .dotx are supported (the modern Office Open XML format). An old .
 
 The middle "Current styles" panel lists every distinct text appearance StyleMash found in the document - most common first - however it got its look, whether that's a named Word style or formatting applied by hand with no style behind it. Each entry shows a live preview, its resolved font, size, colour, bold, italic, underline and strikethrough, and where that look came from.
 
-Tick the checkbox on any entry, or click the row, to select it. You can also click any text in the Document Preview on the left - its entry is selected here, and every place it occurs is highlighted. Click it again to deselect. Select as many entries as you like before merging them together.
+Tick the checkbox on any entry, or click the row, to select it. You can also click any text in the Document Preview on the left - its entry is selected here, and every place it occurs is highlighted. A plain click selects just that one style (replacing whatever was selected before); hold Ctrl (Cmd on a Mac) while clicking to add more styles, or to remove one from the selection. Click the only selected style again to deselect it. Select as many entries as you like before merging them together.
 
 ## New Styles: where merged text ends up
 

@@ -94,6 +94,23 @@ describe('useDocxWorkspace under StrictMode', () => {
     w.cleanup()
   })
 
+  it('selectOnlyVariant replaces the whole selection; toggleSelectVariant adds to it', async () => {
+    const w = await mountWorkspace()
+    const ids = w.api.state.styleReport.flatMap((e) => e.variants.map((v) => v.id))
+    expect(ids.length).toBeGreaterThan(1)
+
+    act(() => w.api.actions.toggleSelectVariant(ids[0]))
+    act(() => w.api.actions.toggleSelectVariant(ids[1]))
+    expect([...w.api.state.selectedVariantIds]).toEqual([ids[0], ids[1]])
+
+    act(() => w.api.actions.selectOnlyVariant(ids[1]))
+    expect([...w.api.state.selectedVariantIds]).toEqual([ids[1]])
+
+    act(() => w.api.actions.selectOnlyVariant(ids[0]))
+    expect([...w.api.state.selectedVariantIds]).toEqual([ids[0]])
+    w.cleanup()
+  })
+
   it('a character merge creates exactly one <w:style>, not a duplicate per re-invocation', async () => {
     const w = await mountWorkspace()
     const variantId = w.api.state.styleReport[0].variants[0].id

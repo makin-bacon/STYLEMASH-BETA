@@ -99,6 +99,7 @@ function App() {
                 styleReport={state.styleReport}
                 selectedVariantIds={state.selectedVariantIds}
                 selectableStyleReport={unmergedStyleReport}
+                onSelectOnlyVariant={actions.selectOnlyVariant}
                 onToggleVariant={actions.toggleSelectVariant}
                 paragraphMarkers={paragraphMarkers}
                 referenceDoc={state.referenceDoc}
