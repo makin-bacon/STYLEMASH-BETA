@@ -101,7 +101,7 @@ export function StyleReportPanel({
     mergeProgress.total === 0 ? 100 : Math.round((mergeProgress.merged / mergeProgress.total) * 100)
   const allMatched = mergeProgress.total > 0 && mergeProgress.remaining === 0
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
+    <div data-tour="current-styles" className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
       <div className="flex min-h-15 items-start justify-between gap-2 border-b border-line bg-chrome px-4 py-4">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-chrome-fg">
           Current styles <span className="font-normal text-chrome-muted">({styleReport.length})</span>
@@ -224,7 +224,7 @@ export function StyleReportPanel({
         </div>
       )}
 
-      <div className="border-t border-line px-4 py-2">
+      <div data-tour="mash-footer" className="border-t border-line px-4 py-2">
         <div className="pt-2 mb-4">
           <div className="flex items-center justify-between text-xs text-ink-4">
             <span>

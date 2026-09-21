@@ -273,7 +273,7 @@ export function UserStylesPanel({
   onToggleDefaultStyleEnabled,
 }: UserStylesPanelProps) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
+    <div data-tour="new-styles" className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
       <div className="flex min-h-15 items-start justify-between gap-2 border-b border-line bg-chrome px-4 py-4">
         <div>
           <h2 className="flex items-center gap-1.5 text-sm font-semibold text-chrome-fg">
@@ -324,8 +324,9 @@ export function UserStylesPanel({
         {userStyles.length === 0 && (
           <li className="flex h-full items-center justify-center px-4 py-6 text-center text-sm text-ink-5">
             <p className="w-3/4">
-              Select entries in Current styles and click "Mash it", or click "+ New Style"
-              to define one from scratch.
+              Start by clicking "+ Defaults" to add a set of ready-made styles. Then click
+              text in the Document Preview (or tick entries in Current styles) and click
+              "Mash it". Or click "+ New Style" to define one from scratch.
             </p>
           </li>
         )}

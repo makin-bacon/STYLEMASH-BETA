@@ -46,6 +46,7 @@ export function DropzoneUpload({ onFileAccepted, errorMessage }: DropzoneUploadP
   return (
     <div className="flex flex-1 items-center justify-center p-8">
       <div
+        data-tour="dropzone"
         onDragOver={(e) => {
           e.preventDefault()
           setIsDragActive(true)

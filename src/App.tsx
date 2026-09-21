@@ -10,6 +10,7 @@ import { UserStylesPanel } from './components/UserStylesPanel'
 import { XmlEditorModal } from './components/XmlEditorModal'
 import { useDocxWorkspace } from './hooks/useDocxWorkspace'
 import { useTheme } from './hooks/useTheme'
+import { useWalkthrough } from './hooks/useWalkthrough'
 import { buildParagraphMarkers } from './lib/ooxml/numbering'
 import { computeMergeProgress, filterUnmergedEntities } from './lib/ooxml/styleReport'
 
@@ -28,6 +29,9 @@ function App() {
   // Light/dark - lives here (not in the footer that renders the switch) so
   // the choice survives any remount and stays one instance for the app.
   const { isDark, toggle: toggleTheme } = useTheme()
+  // First-run guided tour. It starts itself; `restartWalkthrough` (returned)
+  // is what the Help button will call once the tour is signed off.
+  useWalkthrough(state.status)
   // Whether UserStylesPanel's DefaultStylesChecklist is expanded - toggled
   // by AppHeader's "Customise your own style file" button, a sibling of the
   // panel it controls, so this lives here rather than in either component.
