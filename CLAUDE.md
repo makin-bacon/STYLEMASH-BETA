@@ -1288,3 +1288,19 @@ themes.
 - Also renamed the internal prop `onRipAnotherFile` -> `onMashAnotherFile`
   (`StyleReportPanel`/`App`), which belongs to the "Mash a different file" button.
 - Build, 123 tests, lint pass.
+
+#### Follow-up: New Styles footer takes the header colour
+*(same branch, `feature/upload-your-own-mashed`)*
+
+Both footer rows in `UserStylesPanel` ([Clear list | Upload your own] and
+[Undo | Mash it] + Save) now use the New Styles title bar's `bg-chrome`; the
+divider between the two rows was dropped so they read as one footer. Their
+controls moved to the light-on-dark chrome tokens: the outline buttons ("Clear
+list", "Remove Document B") use `border-chrome-edge` / `text-chrome-fg` /
+`hover:bg-chrome-hover`, and the **disabled state of Undo, Mash it, Save and
+Upload your own** is now `bg-chrome-hover` + `text-chrome-dim` (the old pale
+`disabled:bg-disabled` chip would glare on a dark bar in light mode). Contrast
+(computed): disabled text ~4-5:1 on its chip, fg text ~15:1 on the bar. The
+`disabled`/`disabled-fg` tokens are still used by `ContentMergeDialog` and the
+hidden preview merge button. **Not eyeballed in a browser** (Chrome extension
+disconnected) - please check both themes, especially the disabled buttons.

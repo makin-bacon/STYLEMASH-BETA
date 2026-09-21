@@ -373,13 +373,16 @@ export function UserStylesPanel({
           never changes as Document B is attached/removed - same reasoning
           as DocumentPreviewPanel's own footer row. "Clear list" always
           occupies the left half; the right half still swaps between
-          Attach/Remove Document B depending on referenceDoc.status. */}
-      <div className="flex gap-2 border-t border-line px-4 py-2">
+          Attach/Remove Document B depending on referenceDoc.status. Both footer
+          rows share the panel title bar's `bg-chrome`, so the panel is bracketed
+          top and bottom by one colour; their controls therefore use the
+          light-on-dark `chrome-*` tokens (incl. for disabled states). */}
+      <div className="flex gap-2 border-t border-line bg-chrome px-4 py-2">
         <button
           type="button"
           disabled={userStyles.length === 0}
           onClick={onClearUserStyles}
-          className="flex-1 rounded-md border border-line-strong px-3 py-1.5 text-xs font-medium text-ink-3 enabled:hover:bg-soft disabled:cursor-not-allowed disabled:text-ink-6"
+          className="flex-1 rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg enabled:hover:bg-chrome-hover disabled:cursor-not-allowed disabled:text-chrome-dim"
         >
           Clear list
         </button>
@@ -388,7 +391,7 @@ export function UserStylesPanel({
             <button
               type="button"
               onClick={onRemoveReferenceDoc}
-              className="w-full rounded-md border border-line-strong px-3 py-1.5 text-xs font-medium text-ink-3 hover:bg-soft"
+              className="w-full rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg hover:bg-chrome-hover"
             >
               Remove Document B
             </button>
@@ -410,14 +413,14 @@ export function UserStylesPanel({
           panel only mounts once a document is loaded (see App.tsx), so Save
           is never gated on document state - SaveButton's own `isSaving`
           disables it mid-download. */}
-      <div data-tour="mash-footer" className="border-t border-line px-4 py-2">
+      <div data-tour="mash-footer" className="bg-chrome px-4 py-2">
         <div className="flex gap-2">
           <UndoButton disabled={!canUndo} onUndo={onUndo} />
           <button
             type="button"
             disabled={pendingSelectionCount === 0}
             onClick={onMashIt}
-            className="flex-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
+            className="flex-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-chrome-hover disabled:text-chrome-dim"
           >
             Mash it {pendingSelectionCount > 0 ? `(${pendingSelectionCount})` : ''}
           </button>
