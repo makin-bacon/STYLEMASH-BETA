@@ -979,3 +979,31 @@ styles"/"in New Styles"), which now also documents click-to-select.
   eyeballed in dark: MergeDialog, XmlEditorModal (Edit XML has no entry
   point), ContentMergeDialog (feature switched off) - they use the same
   tokens.
+
+### 2026-09-21 — Document Preview: single-select by default, Ctrl/Cmd for multi
+*(branch `feature/single-select-preview`, not yet merged)*
+
+A plain click on preview text now **replaces** the selection with that run's
+variant (new `selectOnlyVariant` / `SELECT_ONLY_VARIANT`, a pure reducer
+case). **Ctrl-click or Cmd-click** toggles it instead (`toggleSelectVariant`),
+so several can be picked; clicking the *only* selected variant deselects it.
+Shift is deliberately not a modifier (it extends the browser's own text
+selection). The handler accepts Ctrl *or* Cmd on every platform, but the hint
+names one key: on a Mac Ctrl-click is a right-click (no `click` event fires),
+so Cmd is documented there (`MULTI_SELECT_KEY` in `DocumentPreviewPanel.tsx`,
+via `userAgentData.platform`/`navigator.platform`).
+
+Header hint is now "Click text to select a style (Hold Ctrl|Cmd to select
+multiple)"; it's `min-w-0 truncate` so a narrow window clips it rather than
+wrapping and growing the header past its shared 60px.
+
+Note a plain preview click clears *everything* else selected too, including
+rows ticked in Current styles - selection is one shared set. Rows ticked in
+the list itself still multi-select by checkbox as before.
+
+Tests (95 → 101): `documentPreviewClick` covers
+plain / Ctrl / Cmd click, clicking the sole selection, narrowing from several,
+non-selectable runs and the hint text; `workspaceReducer` covers
+`selectOnlyVariant`. Verified in Chrome: plain click replaces, Cmd-click adds
+(Mash it (2)), plain click narrows 2 → 1, clicking the sole selection clears
+it.

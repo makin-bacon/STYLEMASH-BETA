@@ -20,8 +20,12 @@ interface DocumentPreviewPanelProps {
    * appears here, so a click can never select something the list doesn't
    * show. */
   selectableStyleReport: StyleEntity[]
-  /** Reverse of the Style Report -> preview highlight: clicking a run here
-   * toggles that run's variant in the same selection the list drives. */
+  /** Reverse of the Style Report -> preview highlight. A plain click on a
+   * run *replaces* the selection with that run's variant (`onSelectOnlyVariant`);
+   * Ctrl/Cmd-click adds or removes it (`onToggleVariant`) so several can be
+   * picked at once. Clicking the only selected variant deselects it. Both act
+   * on the same selection the Current styles list drives. */
+  onSelectOnlyVariant: (variantId: string) => void
   onToggleVariant: (variantId: string) => void
   /** Resolved list marker ("1.", "b)", "•"...) per paragraph, from the same
    * pass StyleReportPanel uses - keeps a numbered/bulleted paragraph looking
@@ -50,6 +54,18 @@ interface PreviewParagraph {
 
 const FLASH_DURATION_MS = 1400
 
+/** Name of the multi-select modifier for this platform, for the header hint.
+ * Ctrl-click on a Mac is a right-click (no click event), so Cmd is the
+ * documented key there; the handler accepts either on every platform. */
+const MULTI_SELECT_KEY = (() => {
+  if (typeof navigator === 'undefined') return 'Ctrl'
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+    navigator.platform ??
+    ''
+  return /mac|iphone|ipad/i.test(platform) ? 'Cmd' : 'Ctrl'
+})()
+
 /** "Merge content into Document B" still needs more work before it's ready
  * for users - the trigger below stays fully wired up (state, handler,
  * ContentMergeDialog) but hidden, rather than removed, so re-enabling it
@@ -67,6 +83,7 @@ export function DocumentPreviewPanel({
   styleReport,
   selectedVariantIds,
   selectableStyleReport,
+  onSelectOnlyVariant,
   onToggleVariant,
   paragraphMarkers,
   referenceDoc,
@@ -105,13 +122,18 @@ export function DocumentPreviewPanel({
   // looking at that text, and re-centering it under their cursor is jarring.
   const selectionFromPreviewRef = useRef(false)
 
-  const handleRunClick = (runElement: Element) => {
+  const handleRunClick = (runElement: Element, event: MouseEvent) => {
     const variantId = runVariantIds.get(runElement)
     if (!variantId) return
     // A drag-to-select-text gesture also ends in a click - leave that alone.
     if (window.getSelection()?.toString()) return
     selectionFromPreviewRef.current = true
-    onToggleVariant(variantId)
+    // Ctrl (Windows/Linux) or Cmd (Mac) = multi-select. Shift is left alone:
+    // it already means "extend the text selection" in a browser.
+    const multi = event.ctrlKey || event.metaKey
+    const isOnlySelection = selectedVariantIds.size === 1 && selectedVariantIds.has(variantId)
+    if (multi || isOnlySelection) onToggleVariant(variantId)
+    else onSelectOnlyVariant(variantId)
   }
 
   const paragraphs = useMemo<PreviewParagraph[]>(() => {
@@ -203,7 +225,14 @@ export function DocumentPreviewPanel({
             text={`${parsedDocx?.originalFilename ?? 'Live preview'} — This is a "style only" preview of your document. It will not display your page flow correctly but that's OK, that's not what this tool is for. To merge your style with approved styles, use the panels to the right.`}
           />
         </h2>
-        <span className="text-xs text-violet-200">Click text to select a style</span>
+        {/* min-w-0 + truncate: on a narrow window the hint clips instead of
+            wrapping, so the header can never grow past its shared height. */}
+        <span
+          className="min-w-0 truncate text-xs text-violet-200"
+          title={`Click text to select a style (Hold ${MULTI_SELECT_KEY} to select multiple)`}
+        >
+          Click text to select a style (Hold {MULTI_SELECT_KEY} to select multiple)
+        </span>
       </div>
 
       <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
@@ -248,7 +277,7 @@ export function DocumentPreviewPanel({
                             else runNodesRef.current.delete(run.runElement)
                           }}
                           style={run.css}
-                          onClick={() => handleRunClick(run.runElement)}
+                          onClick={(e) => handleRunClick(run.runElement, e.nativeEvent)}
                           className={`rounded-sm transition-colors duration-700 ${
                             runVariantIds.has(run.runElement) ? 'cursor-pointer hover:bg-accent-bg-2' : ''
                           } ${

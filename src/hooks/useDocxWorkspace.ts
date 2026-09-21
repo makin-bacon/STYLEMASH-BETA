@@ -144,6 +144,7 @@ type Action =
   | { type: 'FILE_LOADED'; parsedDocx: ParsedDocx; styleReport: StyleEntity[] }
   | { type: 'PARSE_ERROR'; message: string }
   | { type: 'TOGGLE_SELECT_VARIANT'; variantId: string }
+  | { type: 'SELECT_ONLY_VARIANT'; variantId: string }
   | { type: 'CLEAR_SELECTION' }
   | { type: 'OPEN_MERGE_DIALOG'; reuseExistingStyleId?: string }
   | { type: 'CLOSE_MODALS' }
@@ -249,6 +250,9 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
       else next.add(action.variantId)
       return { ...state, selectedVariantIds: next }
     }
+
+    case 'SELECT_ONLY_VARIANT':
+      return { ...state, selectedVariantIds: new Set([action.variantId]) }
 
     case 'CLEAR_SELECTION':
       return { ...state, selectedVariantIds: new Set() }
@@ -494,6 +498,13 @@ export function useDocxWorkspace() {
 
   const toggleSelectVariant = useCallback((variantId: string) => {
     dispatch({ type: 'TOGGLE_SELECT_VARIANT', variantId })
+  }, [])
+
+  /** Replaces the whole selection with just this variant - what a plain
+   * click in the Document Preview does (Ctrl/Cmd-click uses
+   * toggleSelectVariant to add/remove instead). */
+  const selectOnlyVariant = useCallback((variantId: string) => {
+    dispatch({ type: 'SELECT_ONLY_VARIANT', variantId })
   }, [])
 
   const clearSelection = useCallback(() => dispatch({ type: 'CLEAR_SELECTION' }), [])
@@ -835,6 +846,7 @@ export function useDocxWorkspace() {
     actions: {
       loadFile,
       toggleSelectVariant,
+      selectOnlyVariant,
       clearSelection,
       openMergeDialog,
       closeModals,
