@@ -37,6 +37,7 @@ export function StyleVariantRow({
 }: StyleVariantRowProps) {
   return (
     <li
+      data-variant-id={variant.id}
       onClick={onToggleSelect}
       className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-slate-200 py-3 transition-colors last:border-b-0 ${
         indented ? 'pl-8 pr-4' : 'px-4'

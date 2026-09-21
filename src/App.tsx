@@ -135,6 +135,8 @@ function App() {
                 parsedDocx={state.parsedDocx}
                 styleReport={state.styleReport}
                 selectedVariantIds={state.selectedVariantIds}
+                selectableStyleReport={unmergedStyleReport}
+                onToggleVariant={actions.toggleSelectVariant}
                 paragraphMarkers={paragraphMarkers}
                 referenceDoc={state.referenceDoc}
                 isMergingContent={state.isMergingContent}
