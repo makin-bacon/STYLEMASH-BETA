@@ -15,8 +15,10 @@ import { hasSeenWalkthrough, recordWalkthroughEnd } from '../src/lib/walkthrough
 
 type Status = 'empty' | 'loading' | 'loaded' | 'error'
 
+let restart: (() => void) | undefined
+
 function Harness({ status }: { status: Status }) {
-  useWalkthrough(status)
+  restart = useWalkthrough(status).restartWalkthrough
   return null
 }
 
@@ -40,6 +42,7 @@ describe('useWalkthrough', () => {
     window.history.replaceState(null, '', '/')
     destroy = vi.fn()
     runWalkthrough.mockReset()
+    restart = undefined
     runWalkthrough.mockReturnValue({ destroy })
   })
   afterEach(() => {
@@ -104,6 +107,48 @@ describe('useWalkthrough', () => {
     m.setStatus('loading')
     act(() => void vi.advanceTimersByTime(2000))
     expect(runWalkthrough).not.toHaveBeenCalled()
+    m.unmount()
+  })
+
+  it('restartWalkthrough (the Help button) replays the intro on the upload screen even if already seen', () => {
+    recordWalkthroughEnd('landing', 'skipped')
+    const m = mount('empty')
+    act(() => void vi.advanceTimersByTime(2000))
+    expect(runWalkthrough).not.toHaveBeenCalled()
+    act(() => restart!())
+    expect(runWalkthrough).toHaveBeenCalledOnce()
+    expect(runWalkthrough.mock.calls[0][0]).toBe('landing')
+    m.unmount()
+  })
+
+  it('restartWalkthrough replays the workspace tour once a document is open', () => {
+    recordWalkthroughEnd('workspace', 'completed')
+    const m = mount('loaded')
+    act(() => restart!())
+    expect(runWalkthrough.mock.calls[0][0]).toBe('workspace')
+    m.unmount()
+  })
+
+  it('restarting replaces a tour that is already running rather than stacking a second', () => {
+    const m = mount('loaded')
+    act(() => void vi.advanceTimersByTime(1000))
+    act(() => restart!())
+    expect(runWalkthrough).toHaveBeenCalledTimes(2)
+    expect(destroy).toHaveBeenCalled()
+    m.unmount()
+  })
+
+  it('restartWalkthrough does nothing while a file is loading', () => {
+    const m = mount('loading')
+    act(() => restart!())
+    expect(runWalkthrough).not.toHaveBeenCalled()
+    m.unmount()
+  })
+
+  it('an upload error still gets the upload-screen intro', () => {
+    const m = mount('error')
+    act(() => void vi.advanceTimersByTime(700))
+    expect(runWalkthrough.mock.calls[0][0]).toBe('landing')
     m.unmount()
   })
 })

@@ -106,7 +106,7 @@ export function recordWalkthroughEnd(kind: WalkthroughKind, reason: WalkthroughE
 }
 
 /** `?tour` in the URL forces the tour to run regardless of what's been seen -
- * for reviewing/demoing it (and a handy hook until the Help button is wired). */
+ * for reviewing/demoing it. (The header's Help button replays it too.) */
 export function isWalkthroughForced(): boolean {
   return typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('tour')
 }

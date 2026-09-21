@@ -20,8 +20,8 @@ const START_DELAY_MS: Record<WalkthroughKind, number> = { landing: 600, workspac
  * mid-tour (e.g. a file is dropped during the intro) the tour is torn down.
  *
  * Returns `restartWalkthrough`, which replays whichever phase matches the
- * current screen - this is what the Help button will call once it's wired up;
- * nothing consumes it yet. */
+ * current screen - the header's Help button calls it. It does nothing while a
+ * file is mid-load (there's nothing on screen to point at). */
 export function useWalkthrough(status: WorkspaceStatus) {
   const activeRef = useRef<WalkthroughHandle | null>(null)
 
@@ -34,7 +34,10 @@ export function useWalkthrough(status: WorkspaceStatus) {
   }, [])
 
   useEffect(() => {
-    const kind: WalkthroughKind | null = status === 'empty' ? 'landing' : status === 'loaded' ? 'workspace' : null
+    // 'error' still shows the upload screen (with its message), so it gets the
+    // upload-screen intro like 'empty' does.
+    const kind: WalkthroughKind | null =
+      status === 'empty' || status === 'error' ? 'landing' : status === 'loaded' ? 'workspace' : null
     if (!kind) return
     if (!isWalkthroughForced() && hasSeenWalkthrough(kind)) return
 
@@ -47,7 +50,7 @@ export function useWalkthrough(status: WorkspaceStatus) {
   }, [status, start])
 
   const restartWalkthrough = useCallback(() => {
-    if (status === 'empty') start('landing')
+    if (status === 'empty' || status === 'error') start('landing')
     else if (status === 'loaded') start('workspace')
   }, [status, start])
 

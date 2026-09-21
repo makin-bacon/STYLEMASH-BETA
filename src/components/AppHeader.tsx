@@ -1,6 +1,3 @@
-import { useState } from 'react'
-import { HelpModal } from './HelpModal'
-
 interface AppHeaderProps {
   filename: string | null
   /** Whether the "Customise your own style file" checklist is currently
@@ -10,16 +7,16 @@ interface AppHeaderProps {
    * button and the panel it controls are siblings. */
   isCustomizeOpen: boolean
   onToggleCustomize: () => void
+  /** "Help" starts the guided tour for the current screen (see
+   * useWalkthrough#restartWalkthrough) - it is the app's only help. */
+  onHelp: () => void
 }
 
 /** Top bar: app name, currently-loaded filename, Help, and "Customise your
- * own style file". Help's open/closed state lives locally here since it's
- * fully self-contained. The "load a different file" action lives on
+ * own style file". The "load a different file" action lives on
  * StyleReportPanel's header instead of here - see StyleReportPanel's
  * "Mash a different file" button. */
-export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize }: AppHeaderProps) {
-  const [isHelpOpen, setIsHelpOpen] = useState(false)
-
+export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize, onHelp }: AppHeaderProps) {
   return (
     <header className="flex items-center justify-between border-b border-line bg-chrome px-6 py-3">
       <div>
@@ -66,14 +63,13 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize }: AppH
         )}
         <button
           type="button"
-          onClick={() => setIsHelpOpen(true)}
+          onClick={onHelp}
+          title="Take a quick guided tour"
           className="rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg hover:bg-chrome-hover"
         >
           Help
         </button>
       </div>
-
-      {isHelpOpen && <HelpModal onClose={() => setIsHelpOpen(false)} />}
     </header>
   )
 }
