@@ -51,6 +51,10 @@ If you already have a clean, approved Word document with the styles you want eve
 
 Click "Save your file" at any time to download the cleaned document. It keeps the original file format and filename, with "-RIPPED" appended - for example, Report.docx becomes Report-RIPPED.docx. Saving does not end your session; keep merging and save again whenever you like.
 
+## Light and dark mode
+
+Use the switch at the bottom right of the page to change between light and dark. StyleMash remembers your choice, and starts in whichever your computer is set to the first time. In dark mode, text colors from your document are lightened just enough to stay readable on the dark background - your file itself is never changed by this.
+
 ## What StyleMash does not do yet
 
 Headers, footers, and footnotes or endnotes are not scanned - only the main body text. Page layout, tables and images are not reproduced in the Document Preview; it is a formatting preview, not a full page-accurate rendering. There is no mobile-friendly version planned.

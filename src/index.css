@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Dark mode is driven by a `dark` class on <html> (set by useTheme, and by
+   the inline script in index.html before first paint so there's no flash),
+   not by the OS setting alone - the footer switch overrides it. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  /* Native scrollbars, form controls and the text-selection color follow. */
+  color-scheme: dark;
+  color: #e2e8f0;
+}
+
 /* App runs full-viewport height so the two-column workspace can fill the window. */
 html,
 body,
@@ -34,4 +49,159 @@ body {
 
 .page-transition {
   animation: page-fade-in 500ms ease-out;
+}
+
+/* ---- Theme tokens --------------------------------------------------
+   Every themed color in the app is one of these semantic names (`bg-surface`,
+   `text-ink-4`, `border-line`, `bg-select`...), so components never say
+   "slate-200" and never need `dark:` variants. @theme holds the light
+   values; `.dark` (below) re-points the same names for dark mode - this is
+   the only place colors are defined per theme.
+   Groups: canvas/surface/soft/track = backgrounds; line* = borders;
+   ink* = text (1 strongest -> 6 faintest); chrome* = the always-dark
+   header/footer/panel-title bars; accent* = links, badges, hovers;
+   select* = "picked" rows in Current styles; target* = the picked New
+   Styles row; warn/flash/danger/tag-* = status colors. Brand-fixed colors
+   (primary buttons, the violet preview header) intentionally stay on the
+   stock palette - they read the same in both themes. */
+@theme {
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-soft: #f8fafc;
+  --color-soft-2: #f1f5f9;
+  --color-track: #e2e8f0;
+  --color-disabled: #cbd5e1;
+  --color-disabled-fg: #ffffff;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-line-hover: #94a3b8;
+  --color-ink: #1e293b;
+  --color-ink-2: #334155;
+  --color-ink-3: #475569;
+  --color-ink-4: #64748b;
+  --color-ink-5: #94a3b8;
+  --color-ink-6: #cbd5e1;
+  --color-chrome: #1e293b;
+  --color-chrome-fg: #e2e8f0;
+  --color-chrome-muted: #94a3b8;
+  --color-chrome-dim: #64748b;
+  --color-chrome-edge: #64748b;
+  --color-chrome-hover: #334155;
+  --color-chrome-hover-2: #475569;
+  --color-accent: #4f46e5;
+  --color-accent-2: #4338ca;
+  --color-accent-3: #3730a3;
+  --color-accent-bg: #eef2ff;
+  --color-accent-bg-2: #e0e7ff;
+  --color-accent-line: #c7d2fe;
+  --color-select: #c7d2fe;
+  --color-select-hover: #a5b4fc;
+  --color-select-active: #818cf8;
+  --color-target: #fde68a;
+  --color-target-hover: #fcd34d;
+  --color-target-active: #fbbf24;
+  --color-target-edge: #f59e0b;
+  --color-target-edge-hover: #fcd34d;
+  --color-warn: #fffbeb;
+  --color-warn-line: #fde68a;
+  --color-warn-ink: #92400e;
+  --color-flash: #a7f3d0;
+  --color-danger: #dc2626;
+  --color-tag-purple: #9333ea;
+  --color-tag-purple-bg: #faf5ff;
+}
+
+.dark {
+  --color-canvas: #020617;
+  --color-surface: #0f172a;
+  --color-soft: #1e293b;
+  --color-soft-2: #273449;
+  --color-track: #334155;
+  --color-disabled: #273449;
+  --color-disabled-fg: #64748b;
+  --color-line: #334155;
+  --color-line-strong: #475569;
+  --color-line-hover: #64748b;
+  --color-ink: #f1f5f9;
+  --color-ink-2: #e2e8f0;
+  --color-ink-3: #cbd5e1;
+  --color-ink-4: #94a3b8;
+  --color-ink-5: #64748b;
+  --color-ink-6: #475569;
+  --color-chrome: #0b1120;
+  --color-chrome-dim: #8391a7;
+  --color-chrome-edge: #475569;
+  --color-chrome-hover: #1e293b;
+  --color-chrome-hover-2: #273449;
+  --color-accent: #818cf8;
+  --color-accent-2: #a5b4fc;
+  --color-accent-3: #c7d2fe;
+  --color-accent-bg: #1e1b4b;
+  --color-accent-bg-2: #312e81;
+  --color-accent-line: #4338ca;
+  --color-select: #312e81;
+  --color-select-hover: #3730a3;
+  --color-select-active: #4338ca;
+  --color-target: #78350f;
+  --color-target-hover: #92400e;
+  --color-target-active: #b45309;
+  --color-target-edge-hover: #b45309;
+  --color-warn: #2a1f0a;
+  --color-warn-line: #78350f;
+  --color-warn-ink: #fcd34d;
+  --color-flash: #064e3b;
+  --color-danger: #f87171;
+  --color-tag-purple: #c084fc;
+  --color-tag-purple-bg: #3b0764;
+}
+
+/* ---- Theme switch -------------------------------------------------- */
+
+/* Theme change = a short cross-fade. useTheme adds `theme-fading` to <html>
+   just around the class flip; while it's there every element eases its
+   colors instead of snapping. The switch itself is excluded so its own
+   knob/sky animation isn't overridden. */
+html.theme-fading *:not(.theme-toggle, .theme-toggle *),
+html.theme-fading *:not(.theme-toggle, .theme-toggle *)::before,
+html.theme-fading *:not(.theme-toggle, .theme-toggle *)::after {
+  transition:
+    background-color 350ms ease,
+    border-color 350ms ease,
+    color 350ms ease,
+    fill 350ms ease,
+    stroke 350ms ease !important;
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle * {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+}
+
+/* ---- Document colors in dark mode ---------------------------------- */
+
+/* Sample text is drawn in the document's own colors (dark blue headings
+   etc.), which are chosen for white paper and go unreadable on a dark
+   surface. signatureToCss also emits the color as --doc-color; in dark mode
+   this raises just its lightness to a readable floor, keeping hue and
+   chroma, so a heading still reads as "that blue". Inline `color` stays as
+   the fallback for browsers without relative color syntax. */
+@supports (color: oklch(from red l c h)) {
+  html.dark [style*="--doc-color"] {
+    color: oklch(from var(--doc-color) max(l, 0.74) c h) !important;
+  }
 }

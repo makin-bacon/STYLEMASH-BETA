@@ -9,6 +9,7 @@ import { StyleReportPanel } from './components/StyleReportPanel'
 import { UserStylesPanel } from './components/UserStylesPanel'
 import { XmlEditorModal } from './components/XmlEditorModal'
 import { useDocxWorkspace } from './hooks/useDocxWorkspace'
+import { useTheme } from './hooks/useTheme'
 import { buildParagraphMarkers } from './lib/ooxml/numbering'
 import { computeMergeProgress, filterUnmergedEntities } from './lib/ooxml/styleReport'
 
@@ -24,6 +25,9 @@ import { computeMergeProgress, filterUnmergedEntities } from './lib/ooxml/styleR
  * changing. */
 function App() {
   const { state, selection, activeEditVariant, enabledDefaultStyleNames, actions } = useDocxWorkspace()
+  // Light/dark - lives here (not in the footer that renders the switch) so
+  // the choice survives any remount and stays one instance for the app.
+  const { isDark, toggle: toggleTheme } = useTheme()
   // Whether UserStylesPanel's DefaultStylesChecklist is expanded - toggled
   // by AppHeader's "Customise your own style file" button, a sibling of the
   // panel it controls, so this lives here rather than in either component.
@@ -69,7 +73,7 @@ function App() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-slate-50">
+    <div className="flex h-full flex-col bg-canvas">
       <AppHeader
         filename={isLoaded ? (state.parsedDocx?.originalFilename ?? null) : null}
         isCustomizeOpen={isCustomizeOpen}
@@ -184,14 +188,14 @@ function App() {
       ) : (
         <div key="landing" className="page-transition flex min-h-0 flex-1 flex-col">
           {state.status === 'loading' ? (
-            <div className="flex flex-1 items-center justify-center text-slate-500">Reading document…</div>
+            <div className="flex flex-1 items-center justify-center text-ink-4">Reading document…</div>
           ) : (
             <DropzoneUpload onFileAccepted={actions.loadFile} errorMessage={state.errorMessage} />
           )}
         </div>
       )}
 
-      <AppFooter />
+      <AppFooter isDark={isDark} onToggleTheme={toggleTheme} />
     </div>
   )
 }

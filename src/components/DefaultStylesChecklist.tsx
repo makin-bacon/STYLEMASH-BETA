@@ -39,8 +39,8 @@ function DefaultStyleRow({
   return (
     <li
       onClick={() => onToggle(def.name)}
-      className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-slate-200 px-4 py-3 transition-colors last:border-b-0 ${
-        checked ? 'border-l-indigo-500 bg-white hover:bg-slate-50' : 'border-l-transparent bg-slate-50/60 hover:bg-slate-50'
+      className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-line px-4 py-3 transition-colors last:border-b-0 ${
+        checked ? 'border-l-indigo-500 bg-surface hover:bg-soft' : 'border-l-transparent bg-soft/60 hover:bg-soft'
       }`}
     >
       <FaCheckbox
@@ -50,10 +50,10 @@ function DefaultStyleRow({
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-base" style={signatureToCss(def.targetSignature)}>
-          {def.listPreviewText && <span className="mr-1 text-slate-400">{def.listPreviewText}</span>}
+          {def.listPreviewText && <span className="mr-1 text-ink-5">{def.listPreviewText}</span>}
           {def.name}
         </p>
-        <p className="mt-1 truncate text-xs text-slate-500">{describeSignature(def.targetSignature)}</p>
+        <p className="mt-1 truncate text-xs text-ink-4">{describeSignature(def.targetSignature)}</p>
       </div>
     </li>
   )
@@ -79,22 +79,22 @@ function CategorySection({
   const checkedCount = styles.filter((s) => enabledNames.has(s.name)).length
 
   return (
-    <div className="overflow-hidden rounded-md border border-slate-200">
+    <div className="overflow-hidden rounded-md border border-line">
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between gap-2 bg-white px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50"
+        className="flex w-full items-center justify-between gap-2 bg-surface px-3 py-2 text-left text-xs font-medium text-ink-2 hover:bg-soft"
       >
         <span className="flex items-center gap-1.5">
           <FontAwesomeIcon
             icon={faChevronRight}
             aria-hidden="true"
-            className={`text-[10px] text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+            className={`text-[10px] text-ink-5 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
           />
           {category}
         </span>
-        <span className="text-[11px] font-normal text-slate-400">
+        <span className="text-[11px] font-normal text-ink-5">
           {checkedCount}/{styles.length}
         </span>
       </button>
@@ -105,7 +105,7 @@ function CategorySection({
         }`}
       >
         <div className="overflow-hidden">
-          <ul className="border-t border-slate-200">
+          <ul className="border-t border-line">
             {styles.map((def) => (
               <DefaultStyleRow key={def.name} def={def} enabledNames={enabledNames} onToggle={onToggle} />
             ))}
@@ -137,7 +137,7 @@ export function DefaultStylesChecklist({ enabledNames, onToggle }: DefaultStyles
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-ink-4">
         Choose which bundled starter styles "+ Defaults" populates below. Unchecked styles are simply
         skipped.
       </p>
@@ -145,7 +145,7 @@ export function DefaultStylesChecklist({ enabledNames, onToggle }: DefaultStyles
       <a
         href="/CLEAN-STYLES.docx"
         download
-        className="inline-flex w-fit items-center gap-1.5 rounded-md border border-indigo-200 px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
+        className="inline-flex w-fit items-center gap-1.5 rounded-md border border-accent-line px-2 py-1 text-xs font-medium text-accent-2 hover:bg-accent-bg"
       >
         <FontAwesomeIcon icon={faDownload} aria-hidden="true" />
         Download reference style file

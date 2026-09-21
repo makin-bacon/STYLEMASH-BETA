@@ -24,12 +24,17 @@ export function signatureToCss(sig: FormattingSignature): CSSProperties {
 
   const family = sig.fontFamily?.trim()
 
+  const color = sig.colorValue === 'auto' ? undefined : `#${sig.colorValue}`
+
   return {
     fontFamily: family
       ? `"${family}", Calibri, "Segoe UI", Arial, sans-serif`
       : 'Calibri, "Segoe UI", Arial, sans-serif',
     fontSize: sig.fontSizeHalfPt ? `${sig.fontSizeHalfPt / 2}pt` : undefined,
-    color: sig.colorValue === 'auto' ? undefined : `#${sig.colorValue}`,
+    color,
+    // Read by index.css's dark-mode rule, which lifts too-dark document
+    // colors to a readable lightness. Inert in light mode.
+    ...(color ? ({ '--doc-color': color } as CSSProperties) : {}),
     fontWeight: sig.bold ? 'bold' : 'normal',
     fontStyle: sig.italic ? 'italic' : 'normal',
     textDecorationLine: decorations.length > 0 ? decorations.join(' ') : 'none',

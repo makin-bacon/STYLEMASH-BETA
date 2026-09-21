@@ -150,17 +150,17 @@ export function MergeDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
-        <h2 className="text-lg font-semibold text-slate-800">{heading}</h2>
+      <div className="w-full max-w-md rounded-lg bg-surface p-5 shadow-xl">
+        <h2 className="text-lg font-semibold text-ink">{heading}</h2>
 
         {!reuseRecord && selectedCount > 0 && (
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-ink-4">
             Merging {selectedCount} selected occurrence{selectedCount === 1 ? '' : 's'} into one named
             style.
           </p>
         )}
         {!reuseRecord && selectedCount === 0 && (
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-ink-4">
             Defines a style with no text merged into it yet - use "Edit" on it later, or select it
             as a target here after selecting Style Report entries.
           </p>
@@ -169,11 +169,11 @@ export function MergeDialog({
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
           {canTargetExisting && (
             <label className="block text-sm">
-              <span className="text-slate-600">Merge into</span>
+              <span className="text-ink-3">Merge into</span>
               <select
                 value={targetStyleId}
                 onChange={(e) => handleTargetChange(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
               >
                 <option value="">A new style</option>
                 {userStyles.map((record) => (
@@ -187,8 +187,8 @@ export function MergeDialog({
           )}
 
           <div className="space-y-1.5">
-            <span className="block text-sm text-slate-600">Style type</span>
-            <div className="flex gap-4 text-sm text-slate-700">
+            <span className="block text-sm text-ink-3">Style type</span>
+            <div className="flex gap-4 text-sm text-ink-2">
               <label className="flex items-center gap-1.5">
                 <input
                   type="radio"
@@ -219,12 +219,12 @@ export function MergeDialog({
 
           {kind === 'paragraph' && (
             <label className="block text-sm">
-              <span className="text-slate-600">List format</span>
+              <span className="text-ink-3">List format</span>
               <select
                 value={listFormat}
                 disabled={typeControlsLocked}
                 onChange={(e) => setListFormat(e.target.value as ListFormat)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none disabled:bg-soft-2 disabled:text-ink-5"
               >
                 {LIST_FORMAT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -236,41 +236,41 @@ export function MergeDialog({
           )}
 
           <label className="block text-sm">
-            <span className="text-slate-600">Style name</span>
+            <span className="text-ink-3">Style name</span>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+              className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
             />
           </label>
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block text-sm">
-              <span className="text-slate-600">Font</span>
+              <span className="text-ink-3">Font</span>
               <input
                 type="text"
                 value={fields.fontFamily}
                 onChange={(e) => setFields({ ...fields, fontFamily: e.target.value })}
-                className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
               />
             </label>
             <label className="block text-sm">
-              <span className="text-slate-600">Size (pt)</span>
+              <span className="text-ink-3">Size (pt)</span>
               <input
                 type="number"
                 min="1"
                 step="0.5"
                 value={fields.fontSizePt}
                 onChange={(e) => setFields({ ...fields, fontSizePt: e.target.value })}
-                className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-line-strong px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
               />
             </label>
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-slate-600">
+            <label className="flex items-center gap-2 text-sm text-ink-3">
               <input
                 type="checkbox"
                 checked={fields.colorAuto}
@@ -284,12 +284,12 @@ export function MergeDialog({
                 type="color"
                 value={fields.colorHex}
                 onChange={(e) => setFields({ ...fields, colorHex: e.target.value })}
-                className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                className="h-7 w-10 cursor-pointer rounded border border-line-strong"
               />
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-ink-3">
             <label className="flex items-center gap-1.5">
               <input
                 type="checkbox"
@@ -322,7 +322,7 @@ export function MergeDialog({
               <select
                 value={fields.underline}
                 onChange={(e) => setFields({ ...fields, underline: e.target.value })}
-                className="rounded-md border border-slate-300 px-1.5 py-1 text-sm"
+                className="rounded-md border border-line-strong px-1.5 py-1 text-sm"
               >
                 {UNDERLINE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -333,23 +333,23 @@ export function MergeDialog({
             </label>
           </div>
 
-          <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-            <p className="text-xs text-slate-400">Preview</p>
+          <div className="rounded-md border border-line bg-soft px-3 py-2">
+            <p className="text-xs text-ink-5">Preview</p>
             <p style={signatureToCss(draftSignature)}>
               {kind === 'paragraph' && listFormat !== 'none' && (
-                <span className="mr-1 text-slate-500">{previewMarkerText(listFormat)}</span>
+                <span className="mr-1 text-ink-4">{previewMarkerText(listFormat)}</span>
               )}
               The quick brown fox jumps over the lazy dog
             </p>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+              className="rounded-md px-3 py-1.5 text-xs font-medium text-ink-3 hover:bg-soft-2"
             >
               Cancel
             </button>

@@ -84,14 +84,14 @@ const { title, intro, sections } = parseHelpContent(helpContentRaw)
 export function HelpModal({ onClose }: HelpModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
-        <h2 className="text-3xl font-semibold text-slate-800">Help</h2>
-        <div className="mt-3 max-h-80 space-y-3 overflow-y-auto text-sm text-slate-600">
-          <h3 className="text-2xl font-semibold text-slate-800">{title}</h3>
+      <div className="w-full max-w-md rounded-lg bg-surface p-5 shadow-xl">
+        <h2 className="text-3xl font-semibold text-ink">Help</h2>
+        <div className="mt-3 max-h-80 space-y-3 overflow-y-auto text-sm text-ink-3">
+          <h3 className="text-2xl font-semibold text-ink">{title}</h3>
           <HelpBlocks blocks={intro} />
           {sections.map((section) => (
             <div key={section.heading} className="space-y-2">
-              <h4 className="text-lg font-semibold text-slate-800">{section.heading}</h4>
+              <h4 className="text-lg font-semibold text-ink">{section.heading}</h4>
               <HelpBlocks blocks={section.blocks} />
             </div>
           ))}
