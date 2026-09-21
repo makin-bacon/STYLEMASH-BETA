@@ -223,7 +223,7 @@ interface UserStylesPanelProps {
   /** Surfaced here (not just in MergeDialog) since MERGE_SELECTED_INTO_TARGET
    * has no dialog of its own to show it in. */
   mergeError: string | null
-  /** Drives the footer's "Attach custom Word styles" button while nothing's
+  /** Drives the footer's "Upload your own" button while nothing's
    * attached, and its "Remove Document B" button once one is - same footer
    * slot either way, just swapping which button occupies it. */
   referenceDoc: ReferenceDocState

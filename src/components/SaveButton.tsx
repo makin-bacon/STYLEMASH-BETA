@@ -6,7 +6,7 @@ interface SaveButtonProps {
 }
 
 /** Always-available save action. Downloads the (possibly edited) document
- * locally in its original format, filename suffixed with "-RIPPED" - never
+ * locally in its original format, filename suffixed with "-MASHED" - never
  * uploads anything anywhere, since StyleMash does all processing
  * client-side in the browser. Rendered in UserStylesPanel's footer, below
  * the Undo/"Mash it" row. Bright `green-400` - the same green as the

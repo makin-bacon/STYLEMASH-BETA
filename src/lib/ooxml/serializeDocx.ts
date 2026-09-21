@@ -83,13 +83,13 @@ export function serializePart(doc: XMLDocument): string {
   return XML_DECLARATION + withoutDeclaration
 }
 
-export function buildRippedFilename(
+export function buildMashedFilename(
   originalFilename: string,
   originalExtension: ParsedDocx['originalExtension'],
 ): string {
   const dotIndex = originalFilename.lastIndexOf('.')
   const baseName = dotIndex === -1 ? originalFilename : originalFilename.slice(0, dotIndex)
-  return `${baseName}-RIPPED.${originalExtension}`
+  return `${baseName}-MASHED.${originalExtension}`
 }
 
 /** Writes the (possibly mutated) document.xml/styles.xml back into the
@@ -119,6 +119,6 @@ export async function serializeDocx(
 
   return {
     blob,
-    filename: buildRippedFilename(parsedDocx.originalFilename, parsedDocx.originalExtension),
+    filename: buildMashedFilename(parsedDocx.originalFilename, parsedDocx.originalExtension),
   }
 }

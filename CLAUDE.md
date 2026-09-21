@@ -1269,3 +1269,22 @@ Disabled state unchanged (`bg-disabled`/`text-disabled-fg`). Doc comment updated
 Build/tests/lint pass; **not eyeballed in a browser** (Chrome extension was
 disconnected) - worth a quick look at the button (esp. the hover shade) in both
 themes.
+
+### 2026-09-22 - "Upload your own" button label; saved files end in "-MASHED"
+*(branch `feature/upload-your-own-mashed`, stacked on the unmerged `feature/save-button-green`)*
+
+- **"Attach custom Word styles" -> "Upload your own"** (`AttachReferenceDocButton.tsx`;
+  its loading label "Reading reference document..." is unchanged, and the
+  companion "Remove Document B" button keeps its name). Kept in sync in: the tour's
+  New Styles step (now "...create one with + New Style, or bring in the styles from
+  another Word file with **Upload your own**" - careful, that string is single-quoted
+  JS, so no apostrophes), `about-content.md` (2 places), `README.md` step 7, and
+  the `UserStylesPanel` comment.
+- **Saved filename suffix `-RIPPED` -> `-MASHED`** (`Report.docx` -> `Report-MASHED.docx`):
+  `serializeDocx.ts#buildRippedFilename` renamed **`buildMashedFilename`**;
+  `serializeRoundtrip.test.ts` expectations, `SaveButton` comment, `README.md` step 11
+  and `about-content.md` updated. Older changelog entries above still say `-RIPPED`
+  - history only.
+- Also renamed the internal prop `onRipAnotherFile` -> `onMashAnotherFile`
+  (`StyleReportPanel`/`App`), which belongs to the "Mash a different file" button.
+- Build, 123 tests, lint pass.

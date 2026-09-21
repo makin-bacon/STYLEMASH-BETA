@@ -40,7 +40,7 @@ interface StyleReportPanelProps {
   onSave: () => void
   /** Drives this panel's own "Mash a different file" header button, plus
    * the equivalent link in the empty state below. */
-  onRipAnotherFile: () => void
+  onMashAnotherFile: () => void
 }
 
 /** Left-hand panel: every distinct text style/appearance found in the
@@ -62,7 +62,7 @@ export function StyleReportPanel({
   onBulkMergeMatched,
   mergeProgress,
   onSave,
-  onRipAnotherFile,
+  onMashAnotherFile,
 }: StyleReportPanelProps) {
   const listRef = useRef<HTMLUListElement>(null)
   const prevSelectedIdsRef = useRef<Set<string>>(new Set())
@@ -97,7 +97,7 @@ export function StyleReportPanel({
         </h2>
         <button
           type="button"
-          onClick={onRipAnotherFile}
+          onClick={onMashAnotherFile}
           className="shrink-0 rounded-md border border-accent-line px-2 py-1 text-xs font-medium text-chrome-fg hover:bg-chrome-hover-2"
         >
           Mash a different file
@@ -118,7 +118,7 @@ export function StyleReportPanel({
               <br />or{' '}
               <button
                 type="button"
-                onClick={onRipAnotherFile}
+                onClick={onMashAnotherFile}
                 className="text-xs font-medium text-accent hover:text-accent-3 hover:underline"
               >
                 mash another file

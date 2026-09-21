@@ -63,7 +63,7 @@ describe('parseDocx -> serializeDocx round trip', () => {
     const parsedDocx = await parseDocx(file)
     const { blob, filename } = await serializeDocx(parsedDocx)
 
-    expect(filename).toBe('fixture-RIPPED.docx')
+    expect(filename).toBe('fixture-MASHED.docx')
 
     const reopenedZip = await JSZip.loadAsync(blob)
     const reDocumentXml = await reopenedZip.file('word/document.xml')!.async('text')
@@ -101,7 +101,7 @@ describe('parseDocx -> serializeDocx round trip', () => {
 
     // Full fidelity check: re-parsing the saved file from scratch resolves
     // the same "1." marker a fresh upload of this file would show.
-    const reopenedFile = new File([blob], 'fixture-RIPPED.docx', {
+    const reopenedFile = new File([blob], 'fixture-MASHED.docx', {
       type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     })
     const reparsed = await parseDocx(reopenedFile)
