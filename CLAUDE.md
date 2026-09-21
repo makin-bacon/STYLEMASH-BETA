@@ -802,3 +802,86 @@ null-fontFamily entries - no Arial anywhere in the checklist), and confirmed
 "+ Defaults" produces exactly 20 records with no duplicates. The root
 directory was confirmed clean afterward (`STYLE-CATEGORIES.docx` and its
 Word lock file both gone).
+
+### 2026-09-18 — Fixed: Document Preview's list/heading numbering didn't
+match the styled appearance of the numbers everywhere else
+
+Per direct report: a numbered heading's marker (e.g. "1.1" ahead of
+"Heading 2") rendered at a plain, small, gray, non-bold size in
+`DocumentPreviewPanel` - its marker `<span>` had no styling of its own
+beyond the paragraph's `text-sm text-slate-800` wrapper, so it never picked
+up the heading's actual font size/weight/family. Every other list/heading
+preview in the app (`StyleVariantRow.tsx` in Current Styles,
+`UserStylesPanel.tsx` in New Styles, `DefaultStylesChecklist.tsx` in the
+Customise panel) already got this right by construction: their marker
+`<span>` sits inside a parent element carrying the resolved signature as
+inline CSS (via `signatureToCss`), so the marker inherits that font size/
+weight/family/style and only overrides color to a muted gray via its own
+class. Document Preview's marker sat in a plain paragraph with no such
+parent style to inherit from, so a numbered heading looked visually
+inconsistent between the two - the same number, but small-and-plain in one
+place and large-and-bold in every other.
+
+Fixed by giving the marker span in `DocumentPreviewPanel.tsx` the first
+run's resolved CSS (`para.runs[0].css`, already computed per-run via
+`signatureToCss` for the run text itself), with `color` explicitly cleared
+so the existing `text-slate-500` class still supplies the muted marker
+color - matching the "inherit everything but color" pattern the other three
+call sites get for free. No other component needed a change, since they
+already followed that pattern.
+
+Verified in Chrome: uploaded `public/CLEAN-STYLES.docx`, confirmed
+"1 Heading 1" / "1.1 Heading 2" / "1.1.1 Heading 3" in Document Preview now
+render their numbers at the same large/bold/colored heading appearance as
+the text next to them, matching the "1.1 Heading" row already shown that
+way in Current Styles. `npm run build` and `npm test` (84/84) both pass.
+
+### 2026-09-18 — New Styles rows grouped into Body/Miscellaneous, Headings,
+Lists sections
+
+Per direct request: New Styles (`UserStylesPanel.tsx`) now groups its rows
+into collapsible category sections, the same convention the "Customise your
+own style file" checklist already uses (chevron + count header, 0fr/1fr
+grid-template-rows expand animation - see `DefaultStylesChecklist.tsx`'s
+`CategorySection`), rather than one flat list. Unlike that checklist's
+categories (sourced from a reference file's own section headings via a
+fixed `category` field), a `UserStyleRecord` is created ad hoc (a merge,
+"+ New Style", or "+ Defaults") with no such field, so grouping here is
+keyword-based on the style's own name per the request's own rule: a name
+containing "heading" (case-insensitive) groups under **Headings**, one
+containing "list" groups under **Lists**, and everything else falls into
+**Body/Miscellaneous** - which always renders first, Headings and Lists
+after it (matching the Heading-before-List convention
+`DefaultStyleCategory` already uses elsewhere). New
+`src/lib/userStyleCategories.ts` (`categorizeUserStyle`/
+`groupUserStylesByCategory`/`USER_STYLE_CATEGORIES`) holds this - a plain
+string-matching function, not OOXML logic, so it sits alongside
+`signatureToCss.ts`/`styleDescriptions.ts` in `src/lib/` rather than
+`src/lib/ooxml/`.
+
+The existing per-row markup (FaCheckbox, live-styled sample line + list
+marker, occurrence badge, Edit button, click-to-select-as-merge-target) was
+extracted unchanged into a new `UserStyleRow` component so it could be
+rendered under either grouping; behavior is identical to before, just
+nested one level deeper. A category section defaults **open** (unlike
+`DefaultStylesChecklist`'s sections, which default closed) - this is the
+user's actual working style list, not a rarely-opened settings panel, so a
+closed-by-default section would read as those styles having disappeared. A
+category with zero styles isn't rendered at all, so e.g. a document with no
+list-derived styles yet won't show an empty "Lists" header.
+
+Tests added (84 → 91): `tests/userStyleCategories.test.ts` covers
+`categorizeUserStyle`'s three keyword outcomes (including the
+both-keywords-match tiebreak favoring Headings) and
+`groupUserStylesByCategory`'s per-category ordering/emptiness.
+
+Verified in Chrome: uploaded `public/CLEAN-STYLES.docx` and clicked
+"+ Defaults" (20 styles) - New Styles rendered exactly three sections in the
+requested order (Body/Miscellaneous 6, Headings 8, Lists 6), each
+collapsing/expanding independently via its chevron, with every style landing
+in the expected section (e.g. "Normal"/"Document title"/"HTML link" under
+Body/Miscellaneous, "heading 1..4"/"Heading 1-3 No Numbering" under
+Headings, "List Bullet 1-3"/"List Number 1-3" under Lists). Clicking a row
+inside a group still selects it as the merge target (amber highlight +
+checked box), unchanged from before grouping was added. `npm run
+build`/`test` (91/91)/`lint` all pass.

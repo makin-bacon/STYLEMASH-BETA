@@ -177,7 +177,20 @@ export function DocumentPreviewPanel({
               className="mb-2 flex min-h-[1.25em] gap-2 text-sm leading-relaxed text-slate-800"
               style={marker ? { paddingLeft: `${marker.ilvl * 1.25}em` } : undefined}
             >
-              {marker?.text && <span className="shrink-0 select-none text-slate-500">{marker.text}</span>}
+              {marker?.text && (
+                // Matches the marker convention every other panel already uses
+                // (StyleVariantRow, UserStylesPanel, DefaultStylesChecklist):
+                // inherit the paragraph's own resolved font (size/weight/
+                // family/italic), only overriding color to a muted gray, so a
+                // numbered heading's "1." reads at heading size here too
+                // instead of always rendering at the paragraph's own text-sm.
+                <span
+                  className="shrink-0 select-none text-slate-500"
+                  style={para.runs[0] ? { ...para.runs[0].css, color: undefined } : undefined}
+                >
+                  {marker.text}
+                </span>
+              )}
               <span>
                 {para.runs.length === 0
                   ? '\u00A0'

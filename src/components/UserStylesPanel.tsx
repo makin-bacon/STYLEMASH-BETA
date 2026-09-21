@@ -1,8 +1,12 @@
+import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import type { ReferenceDocState } from '../hooks/useDocxWorkspace'
 import type { StyleEntity, UserStyleRecord } from '../types/ooxml'
 import type { ParagraphMarker } from '../lib/ooxml/numbering'
 import { countOccurrencesForStyleId } from '../lib/ooxml/styleReport'
 import { signatureToCss } from '../lib/signatureToCss'
+import { USER_STYLE_CATEGORIES, groupUserStylesByCategory, type UserStyleCategory } from '../lib/userStyleCategories'
 import { AttachReferenceDocButton } from './AttachReferenceDocButton'
 import { DefaultStylesChecklist } from './DefaultStylesChecklist'
 import { FaCheckbox } from './FaCheckbox'
@@ -36,6 +40,161 @@ function markerForStyleId(
     }
   }
   return undefined
+}
+
+/** One User-Created style row - the exact markup UserStylesPanel's list used
+ * to render inline, pulled out so it can be rendered under a category
+ * section instead of a flat list. Behavior unchanged: clicking anywhere but
+ * "Edit" picks this record as the merge target. */
+function UserStyleRow({
+  record,
+  styleReport,
+  paragraphMarkers,
+  onEditStyle,
+  selectedTargetStyleId,
+  onToggleSelectTarget,
+  pendingSelectionCount,
+  onMergeSelectedIntoTarget,
+  mergeError,
+}: {
+  record: UserStyleRecord
+  styleReport: StyleEntity[]
+  paragraphMarkers: Map<Element, ParagraphMarker>
+  onEditStyle: (styleId: string) => void
+  selectedTargetStyleId: string | null
+  onToggleSelectTarget: (styleId: string) => void
+  pendingSelectionCount: number
+  onMergeSelectedIntoTarget: () => void
+  mergeError: string | null
+}) {
+  const occurrences = countOccurrencesForStyleId(styleReport, record.styleId)
+  const markerText = markerForStyleId(styleReport, record.styleId, paragraphMarkers)?.text || record.listPreviewText
+  const isTarget = selectedTargetStyleId === record.styleId
+  return (
+    <li
+      onClick={() => onToggleSelectTarget(record.styleId)}
+      className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-slate-200 px-4 py-3 transition-colors last:border-b-0 ${
+        isTarget
+          ? // Deliberately a different accent (amber, not the Current
+            // Styles list's indigo) - loud on purpose, as a stopgap so
+            // "selected here" and "selected over there" read as
+            // visually distinct lists rather than one shared
+            // selection. Revisit with a more considered color later.
+            'border-l-amber-500 bg-amber-200 hover:bg-amber-300 active:bg-amber-400'
+          : 'border-l-transparent hover:border-l-amber-300 hover:bg-slate-50 active:bg-slate-100'
+      }`}
+    >
+      <FaCheckbox
+        checked={isTarget}
+        onToggle={() => onToggleSelectTarget(record.styleId)}
+        label={`Select "${record.name}" as the merge target`}
+        className="mt-0.5"
+      />
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-base font-medium" style={signatureToCss(record.targetSignature)}>
+          {markerText && <span className="mr-1 text-slate-400">{markerText}</span>}
+          {record.name}
+        </p>
+        <p className="mt-1 truncate text-xs text-slate-400">styleId: {record.styleId}</p>
+        {isTarget && pendingSelectionCount > 0 && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onMergeSelectedIntoTarget()
+            }}
+            className="mt-2 rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700"
+          >
+            Merge {pendingSelectionCount} selected here
+          </button>
+        )}
+        {isTarget && mergeError && <p className="mt-1 text-xs text-red-600">{mergeError}</p>}
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        {record.fromReferenceDoc && (
+          <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">
+            from Document B
+          </span>
+        )}
+        {record.kind === 'paragraph' && (
+          <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-600">
+            {record.listFormat === 'bullet'
+              ? 'Bulleted list'
+              : record.listFormat === 'decimal'
+                ? 'Numbered list'
+                : 'Paragraph style'}
+          </span>
+        )}
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+          {occurrences}×
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onEditStyle(record.styleId)
+          }}
+          className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+        >
+          Edit
+        </button>
+      </div>
+    </li>
+  )
+}
+
+/** One collapsible category section (Body/Miscellaneous, Headings, Lists) -
+ * the same 0fr/1fr grid-template-rows expand animation and chevron
+ * DefaultStylesChecklist's own CategorySection uses, so grouping reads as
+ * one consistent convention across both panels. Defaults open (unlike the
+ * Customise checklist's sections, which default closed): this is the user's
+ * actual working list of styles, not a rarely-opened settings panel, so
+ * hiding its contents by default would read as styles having disappeared. */
+function UserStyleCategorySection({
+  category,
+  records,
+  ...rowProps
+}: {
+  category: UserStyleCategory
+  records: UserStyleRecord[]
+} & Omit<Parameters<typeof UserStyleRow>[0], 'record'>) {
+  const [isOpen, setIsOpen] = useState(true)
+
+  return (
+    <li className="border-b border-slate-200 last:border-b-0">
+      <button
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-expanded={isOpen}
+        className="flex w-full items-center justify-between gap-2 bg-slate-50 px-4 py-2 text-left text-xs font-semibold text-slate-600 hover:bg-slate-100"
+      >
+        <span className="flex items-center gap-1.5">
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            aria-hidden="true"
+            className={`text-[10px] text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+          />
+          {category}
+        </span>
+        <span className="text-[11px] font-normal text-slate-400">{records.length}</span>
+      </button>
+
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <ul>
+            {records.map((record) => (
+              <UserStyleRow key={record.styleId} record={record} {...rowProps} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    </li>
+  )
 }
 
 interface UserStylesPanelProps {
@@ -170,85 +329,27 @@ export function UserStylesPanel({
             </p>
           </li>
         )}
-        {userStyles.map((record) => {
-          const occurrences = countOccurrencesForStyleId(styleReport, record.styleId)
-          const markerText =
-            markerForStyleId(styleReport, record.styleId, paragraphMarkers)?.text || record.listPreviewText
-          const isTarget = selectedTargetStyleId === record.styleId
-          return (
-            <li
-              key={record.styleId}
-              onClick={() => onToggleSelectTarget(record.styleId)}
-              className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-slate-200 px-4 py-3 transition-colors last:border-b-0 ${
-                isTarget
-                  ? // Deliberately a different accent (amber, not the Current
-                    // Styles list's indigo) - loud on purpose, as a stopgap so
-                    // "selected here" and "selected over there" read as
-                    // visually distinct lists rather than one shared
-                    // selection. Revisit with a more considered color later.
-                    'border-l-amber-500 bg-amber-200 hover:bg-amber-300 active:bg-amber-400'
-                  : 'border-l-transparent hover:border-l-amber-300 hover:bg-slate-50 active:bg-slate-100'
-              }`}
-            >
-              <FaCheckbox
-                checked={isTarget}
-                onToggle={() => onToggleSelectTarget(record.styleId)}
-                label={`Select "${record.name}" as the merge target`}
-                className="mt-0.5"
-              />
-
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-base font-medium" style={signatureToCss(record.targetSignature)}>
-                  {markerText && <span className="mr-1 text-slate-400">{markerText}</span>}
-                  {record.name}
-                </p>
-                <p className="mt-1 truncate text-xs text-slate-400">styleId: {record.styleId}</p>
-                {isTarget && pendingSelectionCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onMergeSelectedIntoTarget()
-                    }}
-                    className="mt-2 rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700"
-                  >
-                    Merge {pendingSelectionCount} selected here
-                  </button>
-                )}
-                {isTarget && mergeError && <p className="mt-1 text-xs text-red-600">{mergeError}</p>}
-              </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                {record.fromReferenceDoc && (
-                  <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">
-                    from Document B
-                  </span>
-                )}
-                {record.kind === 'paragraph' && (
-                  <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-600">
-                    {record.listFormat === 'bullet'
-                      ? 'Bulleted list'
-                      : record.listFormat === 'decimal'
-                        ? 'Numbered list'
-                        : 'Paragraph style'}
-                  </span>
-                )}
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                  {occurrences}×
-                </span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onEditStyle(record.styleId)
-                  }}
-                  className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
-                >
-                  Edit
-                </button>
-              </div>
-            </li>
-          )
-        })}
+        {userStyles.length > 0 &&
+          (() => {
+            const groups = groupUserStylesByCategory(userStyles)
+            return USER_STYLE_CATEGORIES.filter((category) => (groups.get(category)?.length ?? 0) > 0).map(
+              (category) => (
+                <UserStyleCategorySection
+                  key={category}
+                  category={category}
+                  records={groups.get(category) ?? []}
+                  styleReport={styleReport}
+                  paragraphMarkers={paragraphMarkers}
+                  onEditStyle={onEditStyle}
+                  selectedTargetStyleId={selectedTargetStyleId}
+                  onToggleSelectTarget={onToggleSelectTarget}
+                  pendingSelectionCount={pendingSelectionCount}
+                  onMergeSelectedIntoTarget={onMergeSelectedIntoTarget}
+                  mergeError={mergeError}
+                />
+              ),
+            )
+          })()}
       </ul>
 
       {/* Always rendered (never conditionally mounted) so this row's height
