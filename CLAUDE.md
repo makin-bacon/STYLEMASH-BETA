@@ -1007,3 +1007,56 @@ non-selectable runs and the hint text; `workspaceReducer` covers
 `selectOnlyVariant`. Verified in Chrome: plain click replaces, Cmd-click adds
 (Mash it (2)), plain click narrows 2 → 1, clicking the sole selection clears
 it.
+
+### 2026-09-21 — First-run guided tour (driver.js) + New Styles empty-state copy
+*(branch `feature/guided-tour`, stacked on the unmerged `feature/single-select-preview` -
+the tour's preview step describes Ctrl/Cmd multi-select. **Not wired to the Help
+button yet - by request, pending sign-off.**)*
+
+- **Library:** `driver.js` 1.8.0 (exact-pinned, MIT, ~5 kB gz): animated
+  spotlight glide between targets, popover, Back/Next/Skip, progress, arrow-key
+  and Esc support. Themed via the color tokens (`.sm-tour` rules at the bottom
+  of `index.css`), so it follows light/dark. Subtle motion: popover eases in
+  (fade + 6px rise), the spotlighted element "breathes" a soft accent ring;
+  `prefers-reduced-motion` turns off both plus driver's own animation.
+- **Steps (5 total, two phases):** the app has two screens, so the tour does
+  too. *Intro* (upload screen, 1 step, "Got it"): drop a .docx. *Workspace* (4
+  steps, after the first file loads): Preview → Current styles → New Styles →
+  "Mash it, then save" (spotlights the Mash/Undo/Save footer). Copy lives in
+  `src/lib/walkthrough.ts` (`LANDING_STEPS`/`WORKSPACE_STEPS`); targets are
+  `data-tour="dropzone|preview|current-styles|new-styles|mash-footer"`
+  attributes on the components, so markup can move without touching the tour.
+- **Skip / rewind:** Back and Next on every step, "Skip tour" link on every step
+  but the last, the X, and Esc; ←/→ keys work. Clicking the dimmed backdrop is
+  deliberately a no-op (a stray click can't throw the tour away).
+- **When it runs (`useWalkthrough(status)`, called from `App.tsx`):**
+  automatically, once each: the intro on first sight of the upload screen, the
+  workspace tour the first time a document loads (900 ms delay so the 500 ms
+  page fade has settled). If a file loads during the intro, the intro is torn
+  down silently. State in `localStorage` (`stylemash-tour-landing` /
+  `-workspace`); skipping anywhere - or reaching the workspace phase at all -
+  marks everything seen. **`?tour` in the URL forces it to run** regardless
+  (for review/demo). The hook also returns `restartWalkthrough()` (replays the
+  phase for the current screen) - **that is the hook the Help button will call
+  when we wire it up**; nothing consumes it yet.
+- `MULTI_SELECT_KEY` moved to `src/lib/platform.ts` (shared by the preview hint
+  and the tour copy).
+- **New Styles empty state** now leads with the +Defaults suggestion and
+  mentions clicking preview text: *Start by clicking "+ Defaults" to add a set
+  of ready-made styles. Then click text in the Document Preview (or tick entries
+  in Current styles) and click "Mash it". Or click "+ New Style" to define one
+  from scratch.*
+- **Dev-only gotcha:** Vite hot reload of `walkthrough.ts`/`useWalkthrough.ts`/
+  `App.tsx` re-runs the hook's effect, which tears the tour down and restarts it
+  at step 1 (and Vite's first-time optimization of a newly installed dep
+  reloads the page). If a tour "vanishes" or jumps back while editing, that's
+  HMR, not a bug - and clicks during the ~900 ms teardown gap fall through to
+  the page underneath.
+- Tests 101 → 116: `tests/walkthrough.test.ts` (step shape/uniqueness, every
+  `data-tour` target exists in a component, persistence rules) and
+  `tests/useWalkthrough.test.tsx` (start delays, seen/forced, teardown on file
+  load, outcome recording; `runWalkthrough` mocked).
+- Verified in Chrome (dev server, first-run state): intro spotlight → upload
+  hands off to the workspace tour → all four steps, Back rewinds, Skip tour and
+  Done both end it cleanly (overlay + body classes removed, flags set), dark
+  theme popover, tour survives 10 s idle.

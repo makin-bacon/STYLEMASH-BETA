@@ -5,6 +5,7 @@ import type { ParsedDocx, StyleEntity } from '../types/ooxml'
 import { NS } from '../lib/ooxml/constants'
 import type { ParagraphMarker } from '../lib/ooxml/numbering'
 import { collectRunRefsForVariantIds, getOwnRuns, getRunText } from '../lib/ooxml/styleReport'
+import { MULTI_SELECT_KEY } from '../lib/platform'
 import { signatureToCss } from '../lib/signatureToCss'
 import { InfoTooltip } from './InfoTooltip'
 
@@ -53,18 +54,6 @@ interface PreviewParagraph {
 }
 
 const FLASH_DURATION_MS = 1400
-
-/** Name of the multi-select modifier for this platform, for the header hint.
- * Ctrl-click on a Mac is a right-click (no click event), so Cmd is the
- * documented key there; the handler accepts either on every platform. */
-const MULTI_SELECT_KEY = (() => {
-  if (typeof navigator === 'undefined') return 'Ctrl'
-  const platform =
-    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
-    navigator.platform ??
-    ''
-  return /mac|iphone|ipad/i.test(platform) ? 'Cmd' : 'Ctrl'
-})()
 
 /** "Merge content into Document B" still needs more work before it's ready
  * for users - the trigger below stays fully wired up (state, handler,
@@ -212,7 +201,7 @@ export function DocumentPreviewPanel({
   }, [selectedVariantIds, styleReport])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
+    <div data-tour="preview" className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
       {/* Dark violet title bar with white text. `items-baseline` (not the
           other panels' `items-start`) puts the right-hand hint on the same
           text baseline as the title - and, since the title is the taller
