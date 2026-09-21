@@ -15,7 +15,7 @@ export function UndoButton({ disabled, onUndo }: UndoButtonProps) {
       type="button"
       disabled={disabled}
       onClick={onUndo}
-      className="shrink-0 rounded-md bg-orange-500 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+      className="shrink-0 rounded-md bg-orange-500 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
     >
       Undo
     </button>

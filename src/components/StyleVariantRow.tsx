@@ -39,12 +39,12 @@ export function StyleVariantRow({
     <li
       data-variant-id={variant.id}
       onClick={onToggleSelect}
-      className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-slate-200 py-3 transition-colors last:border-b-0 ${
+      className={`flex cursor-pointer items-start gap-3 border-b border-l-4 border-line py-3 transition-colors last:border-b-0 ${
         indented ? 'pl-8 pr-4' : 'px-4'
       } ${
         selected
-          ? 'border-l-indigo-500 bg-indigo-200 hover:bg-indigo-300 active:bg-indigo-400'
-          : 'border-l-transparent bg-white hover:bg-slate-50 active:bg-slate-100'
+          ? 'border-l-indigo-500 bg-select hover:bg-select-hover active:bg-select-active'
+          : 'border-l-transparent bg-surface hover:bg-soft active:bg-soft-2'
       }`}
     >
       {/* Same FaCheckbox glyph used by the "Customise your own style file"
@@ -61,15 +61,15 @@ export function StyleVariantRow({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-base" style={signatureToCss(signature)}>
-          {listMarker?.text && <span className="mr-1 text-slate-400">{listMarker.text}</span>}
+          {listMarker?.text && <span className="mr-1 text-ink-5">{listMarker.text}</span>}
           {variant.sampleText || '(no visible text)'}
         </p>
-        {!indented && <p className="mt-1 truncate text-xs text-slate-500">{describeSignature(signature)}</p>}
-        <p className="mt-0.5 truncate text-xs text-slate-400">{describeOrigin(variant.origin)}</p>
+        {!indented && <p className="mt-1 truncate text-xs text-ink-4">{describeSignature(signature)}</p>}
+        <p className="mt-0.5 truncate text-xs text-ink-5">{describeOrigin(variant.origin)}</p>
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+        <span className="rounded-full bg-soft-2 px-2 py-0.5 text-xs font-medium text-ink-3">
           {variant.occurrenceCount}×
         </span>
       </div>

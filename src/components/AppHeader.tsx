@@ -21,9 +21,9 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize }: AppH
   const [isHelpOpen, setIsHelpOpen] = useState(false)
 
   return (
-    <header className="flex items-center justify-between border-b border-slate-200 bg-slate-800 px-6 py-3">
+    <header className="flex items-center justify-between border-b border-line bg-chrome px-6 py-3">
       <div>
-        <h1 className="flex items-center gap-2 text-xl font-bold text-slate-200">
+        <h1 className="flex items-center gap-2 text-xl font-bold text-chrome-fg">
           {/* StyleMash's own mark (see /favicon.svg) - inlined as JSX rather
               than an <img> so its fill="currentColor" keeps inheriting this
               heading's text color, same as the FontAwesome glyph it
@@ -41,7 +41,7 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize }: AppH
             </span>
           </span>
         </h1>
-        {filename && <p className="text-xs text-slate-500">CURRENTLY MASHING: {filename}</p>}
+        {filename && <p className="text-xs text-chrome-dim">CURRENTLY MASHING: {filename}</p>}
       </div>
 
       <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize }: AppH
             className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
               isCustomizeOpen
                 ? 'border-indigo-400 bg-indigo-600 text-white hover:bg-indigo-700'
-                : 'border-slate-500 text-slate-200 hover:bg-slate-700'
+                : 'border-chrome-edge text-chrome-fg hover:bg-chrome-hover'
             }`}
           >
             Customise your own style file
@@ -67,7 +67,7 @@ export function AppHeader({ filename, isCustomizeOpen, onToggleCustomize }: AppH
         <button
           type="button"
           onClick={() => setIsHelpOpen(true)}
-          className="rounded-md border border-slate-500 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700"
+          className="rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg hover:bg-chrome-hover"
         >
           Help
         </button>

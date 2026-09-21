@@ -101,16 +101,16 @@ export function StyleReportPanel({
     mergeProgress.total === 0 ? 100 : Math.round((mergeProgress.merged / mergeProgress.total) * 100)
   const allMatched = mergeProgress.total > 0 && mergeProgress.remaining === 0
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
-      <div className="flex min-h-15 items-start justify-between gap-2 border-b border-slate-200 bg-slate-800 px-4 py-4">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-200">
-          Current styles <span className="font-normal text-slate-400">({styleReport.length})</span>
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
+      <div className="flex min-h-15 items-start justify-between gap-2 border-b border-line bg-chrome px-4 py-4">
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-chrome-fg">
+          Current styles <span className="font-normal text-chrome-muted">({styleReport.length})</span>
           <InfoTooltip text="Select items from this list and you'll see them in your document. Now either merge these with a newly created style or one from an uploaded reference Word file in the &quot;New&quot; styles list." />
         </h2>
         <button
           type="button"
           onClick={onRipAnotherFile}
-          className="shrink-0 rounded-md border border-indigo-200 px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-600"
+          className="shrink-0 rounded-md border border-accent-line px-2 py-1 text-xs font-medium text-chrome-fg hover:bg-chrome-hover-2"
         >
           Mash a different file
         </button>
@@ -118,12 +118,12 @@ export function StyleReportPanel({
 
       <ul ref={listRef} className="min-h-0 flex-1 overflow-y-auto">
         {allMatched ? (
-          <li className="flex h-full items-center justify-center px-4 py-6 text-center text-sm text-slate-400">
+          <li className="flex h-full items-center justify-center px-4 py-6 text-center text-sm text-ink-5">
             <p>
               <button
                 type="button"
                 onClick={onSave}
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                className="text-xs font-medium text-accent hover:text-accent-3 hover:underline"
               >
                 Save your work
               </button>{' '}
@@ -131,7 +131,7 @@ export function StyleReportPanel({
               <button
                 type="button"
                 onClick={onRipAnotherFile}
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                className="text-xs font-medium text-accent hover:text-accent-3 hover:underline"
               >
                 mash another file
               </button>
@@ -140,7 +140,7 @@ export function StyleReportPanel({
         ) : (
           <>
             {styleReport.length === 0 && (
-              <li className="px-4 py-6 text-center text-sm text-slate-400">
+              <li className="px-4 py-6 text-center text-sm text-ink-5">
                 No formatted text found in this document.
               </li>
             )}
@@ -155,8 +155,8 @@ export function StyleReportPanel({
                   onToggleSelect={() => onToggleSelect(entity.variants[0].id)}
                 />
               ) : (
-                <li key={entity.id} className="border-b border-slate-200 last:border-b-0">
-                  <div className="bg-slate-50 px-4 py-1.5">
+                <li key={entity.id} className="border-b border-line last:border-b-0">
+                  <div className="bg-soft px-4 py-1.5">
                     <p className="truncate text-sm" style={signatureToCss(entity.signature)}>
                       {/* Marker and text both come from variants[0] (the most common
                           variant) rather than entity.sampleText - keeping them from the
@@ -166,13 +166,13 @@ export function StyleReportPanel({
                           since list vs. non-list is its own variant dimension could
                           easily belong to a different variant than variants[0]). */}
                       {markerFor(entity.variants[0], paragraphMarkers)?.text && (
-                        <span className="mr-1 text-slate-400">
+                        <span className="mr-1 text-ink-5">
                           {markerFor(entity.variants[0], paragraphMarkers)?.text}
                         </span>
                       )}
                       {entity.variants[0].sampleText || '(no visible text)'}
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-slate-500">
+                    <p className="mt-0.5 truncate text-xs text-ink-4">
                       {describeSignature(entity.signature)} · {entity.occurrenceCount} total across{' '}
                       {entity.variants.length} sources
                     </p>
@@ -201,8 +201,8 @@ export function StyleReportPanel({
           stray padding under the page footer. Re-enable by restoring the
           `hasReferenceStyles &&` condition below. */}
       {false && hasReferenceStyles && (
-        <div className="border-t border-slate-200 bg-indigo-50/50 px-4 py-2">
-          <label className="flex items-center gap-2 text-xs text-slate-600">
+        <div className="border-t border-line bg-accent-bg/50 px-4 py-2">
+          <label className="flex items-center gap-2 text-xs text-ink-3">
             <input
               type="checkbox"
               onChange={(e) => {
@@ -216,23 +216,23 @@ export function StyleReportPanel({
             type="button"
             disabled={selectedIds.size === 0}
             onClick={onBulkMergeMatched}
-            className="mt-1.5 w-full rounded-md border border-indigo-300 bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 enabled:hover:bg-indigo-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
+            className="mt-1.5 w-full rounded-md border border-accent-line bg-surface px-3 py-1.5 text-xs font-medium text-accent-2 enabled:hover:bg-accent-bg-2 disabled:cursor-not-allowed disabled:border-line disabled:text-ink-5"
           >
             Merge matched styles into Document B
           </button>
-          {bulkMergeError && <p className="mt-1 text-xs text-red-600">{bulkMergeError}</p>}
+          {bulkMergeError && <p className="mt-1 text-xs text-danger">{bulkMergeError}</p>}
         </div>
       )}
 
-      <div className="border-t border-slate-200 px-4 py-2">
+      <div className="border-t border-line px-4 py-2">
         <div className="pt-2 mb-4">
-          <div className="flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center justify-between text-xs text-ink-4">
             <span>
               {mergeProgress.merged} of {mergeProgress.total} merged into a User-Created style
             </span>
             <span>{mergeProgress.remaining} left</span>
           </div>
-          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-track">
             <div
               className="h-full rounded-full bg-indigo-500 transition-[width]"
               style={{ width: `${percentMerged}%` }}
@@ -251,7 +251,7 @@ export function StyleReportPanel({
             type="button"
             disabled={selectedIds.size === 0}
             onClick={onMergeSelected}
-            className="flex-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="flex-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
           >
             Mash it {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
           </button>

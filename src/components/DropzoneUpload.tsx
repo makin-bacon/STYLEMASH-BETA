@@ -56,11 +56,11 @@ export function DropzoneUpload({ onFileAccepted, errorMessage }: DropzoneUploadP
         role="button"
         tabIndex={0}
         className={`flex w-full max-w-lg cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
-          isDragActive ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 bg-white hover:border-slate-400'
+          isDragActive ? 'border-indigo-500 bg-accent-bg' : 'border-line-strong bg-surface hover:border-line-hover'
         }`}
       >
-        <p className="text-lg font-semibold text-slate-700">Drop a Word document here</p>
-        <p className="text-sm text-slate-500">or click to browse - .docx / .dotx only</p>
+        <p className="text-lg font-semibold text-ink-2">Drop a Word document here</p>
+        <p className="text-sm text-ink-4">or click to browse - .docx / .dotx only</p>
         <input
           ref={inputRef}
           type="file"
@@ -69,7 +69,7 @@ export function DropzoneUpload({ onFileAccepted, errorMessage }: DropzoneUploadP
           onChange={(e) => void handleFile(e.target.files?.[0])}
         />
         {(localError || errorMessage) && (
-          <p className="mt-2 text-sm text-red-600">{localError || errorMessage}</p>
+          <p className="mt-2 text-sm text-danger">{localError || errorMessage}</p>
         )}
       </div>
     </div>

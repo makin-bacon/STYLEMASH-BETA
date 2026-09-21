@@ -929,3 +929,52 @@ style". Copy that named panel positions was updated to match: the preview's
 info tooltip ("panels to the right"), `README.md`'s walkthrough, and
 `src/content/help-content.md` ("entries on the left/right" → "in Current
 styles"/"in New Styles"), which now also documents click-to-select.
+
+### 2026-09-21 — Dark mode, semantic color tokens, violet preview header
+*(branch `feature/dark-mode`, not yet merged)*
+
+- **Theme tokens** (`src/index.css`): every themed color is now a semantic
+  Tailwind theme color - `surface`/`canvas`/`soft*`/`track` (backgrounds),
+  `line*` (borders), `ink`..`ink-6` (text, strongest → faintest), `chrome*`
+  (the always-dark header/footer/panel-title bars), `accent*`, `select*`
+  (picked Current styles row), `target*` (picked New Styles row),
+  `warn`/`flash`/`danger`/`tag-purple*`/`disabled*`. `@theme` holds the light
+  values; `.dark` re-points the same names. Components use e.g. `bg-surface`,
+  `text-ink-4`, `border-line` and have **no `dark:` variants** - to retune a
+  theme, edit that one block. (`@custom-variant dark` is still declared for
+  one-offs.) Brand-fixed colors (primary indigo/emerald/orange buttons, the
+  violet preview header, focus accents) stay on the stock palette on purpose.
+  *Gotcha:* one Tailwind shade is one CSS variable across bg/text/border, so
+  remapping `slate-*` itself can't work (the dark chrome shares those shades
+  with the light surfaces) - hence named tokens.
+- **Switch** (`ThemeToggle.tsx`, footer bottom-right; `useTheme.ts`): slate +
+  white only. Knob slides with a small overshoot, sun ↔ moon spin/scale, track
+  eases pale → deep slate, stars twinkle in / clouds out. State is a `dark`
+  class on `<html>`, saved to `localStorage['stylemash-theme']`, falling back
+  to `prefers-color-scheme`; an inline script in `index.html` applies it
+  before first paint (no white flash). Theme changes **cross-fade** via a
+  short-lived `html.theme-fading` class (excludes the switch itself);
+  `prefers-reduced-motion` = instant. (A circular View-Transitions reveal was
+  built and then dropped at the user's request.)
+- **Document colors in dark mode:** sample text uses the document's own
+  colors, chosen for white paper. `signatureToCss` now also emits
+  `--doc-color`; under `html.dark`, an `@supports (oklch(from …))` rule lifts
+  lightness to a 0.74 floor (hue/chroma kept) with `!important` (inline
+  `color` remains the fallback). The preview stays dark too rather than
+  becoming a white "paper" slab.
+- **Document Preview header** is dark violet (`violet-900`) with white title
+  and a violet-200 hint. The "Click text to select a style" hint now uses
+  `items-baseline` so it shares the title's baseline; header height stays 60px
+  like its siblings (measured in Chrome).
+- Fixed stale copy in New Styles' empty state: *"…click "Do it""* →
+  *"Select entries in Current styles and click "Mash it"…"* (also renamed
+  "Style Report" → "Current styles").
+- `tests/styleVariantRow.interaction.test.tsx` now asserts `bg-select` (was
+  `bg-indigo-200`); new `tests/theme.interaction.test.tsx` (95 tests total).
+  Build + tests + lint pass (only the known bulk-match warning).
+- **Verified in Chrome**: both themes, switch animation states, fade
+  (mid-fade color interpolated, `theme-fading` cleaned up), selected row,
+  amber target row, disabled buttons, Help modal, upload screen. Not
+  eyeballed in dark: MergeDialog, XmlEditorModal (Edit XML has no entry
+  point), ContentMergeDialog (feature switched off) - they use the same
+  tokens.

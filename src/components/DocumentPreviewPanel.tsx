@@ -12,7 +12,7 @@ interface DocumentPreviewPanelProps {
   parsedDocx: ParsedDocx | null
   styleReport: StyleEntity[]
   /** Same selection Style Report rows drive for merging - reused here so
-   * checking a row both stages it for "Do it" and highlights every place it
+   * checking a row both stages it for "Mash it" and highlights every place it
    * occurs in the live preview, with no separate UI to keep in sync. */
   selectedVariantIds: Set<string>
   /** The entries currently listed in Current Styles (i.e. minus the ones
@@ -190,20 +190,25 @@ export function DocumentPreviewPanel({
   }, [selectedVariantIds, styleReport])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
-      <div className="flex min-h-15 items-start justify-between gap-2 border-b border-slate-200 bg-slate-50 px-4 py-4">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
+      {/* Dark violet title bar with white text. `items-baseline` (not the
+          other panels' `items-start`) puts the right-hand hint on the same
+          text baseline as the title - and, since the title is the taller
+          item, the title itself stays exactly where it sits in the sibling
+          panels' headers. min-h-15 keeps the bar at the shared height. */}
+      <div className="flex min-h-15 items-baseline justify-between gap-2 border-b border-violet-950 bg-violet-900 px-4 py-4">
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-white">
           Document Preview
           <InfoTooltip
             text={`${parsedDocx?.originalFilename ?? 'Live preview'} — This is a "style only" preview of your document. It will not display your page flow correctly but that's OK, that's not what this tool is for. To merge your style with approved styles, use the panels to the right.`}
           />
         </h2>
-        <span className="text-xs text-slate-500">Click text to select a style</span>
+        <span className="text-xs text-violet-200">Click text to select a style</span>
       </div>
 
       <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {paragraphs.length === 0 && (
-          <p className="flex h-full items-center justify-center text-center text-sm text-slate-400">
+          <p className="flex h-full items-center justify-center text-center text-sm text-ink-5">
             No visible text found in this document.
           </p>
         )}
@@ -212,7 +217,7 @@ export function DocumentPreviewPanel({
           return (
             <p
               key={para.key}
-              className="mb-2 flex min-h-[1.25em] gap-2 text-sm leading-relaxed text-slate-800"
+              className="mb-2 flex min-h-[1.25em] gap-2 text-sm leading-relaxed text-ink"
               style={marker ? { paddingLeft: `${marker.ilvl * 1.25}em` } : undefined}
             >
               {marker?.text && (
@@ -223,7 +228,7 @@ export function DocumentPreviewPanel({
                 // numbered heading's "1." reads at heading size here too
                 // instead of always rendering at the paragraph's own text-sm.
                 <span
-                  className="shrink-0 select-none text-slate-500"
+                  className="shrink-0 select-none text-ink-4"
                   style={para.runs[0] ? { ...para.runs[0].css, color: undefined } : undefined}
                 >
                   {marker.text}
@@ -245,12 +250,12 @@ export function DocumentPreviewPanel({
                           style={run.css}
                           onClick={() => handleRunClick(run.runElement)}
                           className={`rounded-sm transition-colors duration-700 ${
-                            runVariantIds.has(run.runElement) ? 'cursor-pointer hover:bg-indigo-100' : ''
+                            runVariantIds.has(run.runElement) ? 'cursor-pointer hover:bg-accent-bg-2' : ''
                           } ${
                             isFlashed
-                              ? 'bg-emerald-200 ring-2 ring-emerald-400'
+                              ? 'bg-flash ring-2 ring-emerald-400'
                               : isHighlighted
-                                ? 'bg-indigo-200 ring-2 ring-indigo-400'
+                                ? 'bg-select ring-2 ring-indigo-400'
                                 : 'bg-transparent'
                           }`}
                         >
@@ -265,14 +270,14 @@ export function DocumentPreviewPanel({
       </div>
 
       {CONTENT_MERGE_ENABLED && (
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-line bg-soft px-4 py-2">
           <button
             type="button"
             onClick={onOpenContentMerge}
             disabled={isMergingContent || referenceDoc.status !== 'loaded'}
             aria-hidden={referenceDoc.status !== 'loaded'}
             tabIndex={referenceDoc.status === 'loaded' ? 0 : -1}
-            className={`rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300 ${
+            className={`rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg ${
               referenceDoc.status === 'loaded' ? '' : 'invisible'
             }`}
           >

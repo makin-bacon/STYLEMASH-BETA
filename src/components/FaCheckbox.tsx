@@ -41,7 +41,7 @@ export function FaCheckbox({ checked, onToggle, label, className = '' }: FaCheck
         icon={checked ? faSquareCheck : faSquareOutline}
         aria-hidden="true"
         className={`pointer-events-none text-lg transition-all duration-150 ${
-          checked ? 'scale-110 text-indigo-600' : 'scale-100 text-slate-400'
+          checked ? 'scale-110 text-accent' : 'scale-100 text-ink-5'
         }`}
       />
     </span>

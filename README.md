@@ -65,7 +65,8 @@ That's it — StyleMash is now running entirely on your machine. No account, no 
 6. Prefer merging straight into a specific style? Click that style's row in **New Styles** to mark it as the target, select entries in Current styles, then click **Merge N selected here** on the target row — no dialog needed.
 7. Have a second, already-clean Word file with the styles you want to standardize on? Use **Attach custom Word styles** (New Styles panel footer) to import its style definitions as additional merge targets, tagged "from Document B". **Remove Document B** detaches it again — any of its styles you never actually merged into are removed with it.
 8. **Undo** (Current styles panel footer, left of "Mash it") reverts the most recent merge or **Clear list**, one step at a time.
-9. Click **Save your file** (Current styles panel footer) at any time to download the result. The file keeps its original format and filename, with `-RIPPED` appended (e.g. `Report.docx` → `Report-RIPPED.docx`).
+9. Prefer the lights off? The switch at the bottom right of the page toggles light/dark mode (remembered between visits; the first visit follows your OS setting).
+10. Click **Save your file** (Current styles panel footer) at any time to download the result. The file keeps its original format and filename, with `-RIPPED` appended (e.g. `Report.docx` → `Report-RIPPED.docx`).
 
 **Supported formats**: `.docx` and `.dotx` only (Office Open XML). Legacy `.doc` (pre-2007 binary format) isn't supported. Headers, footers, and footnotes/endnotes aren't scanned in this version — only the main document body.
 

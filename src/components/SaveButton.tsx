@@ -16,7 +16,7 @@ export function SaveButton({ disabled, isSaving, onSave, className = '' }: SaveB
       type="button"
       disabled={disabled || isSaving}
       onClick={onSave}
-      className={`rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 ${className}`}
+      className={`rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg ${className}`}
     >
       {isSaving ? 'Saving…' : 'Save your file'}
     </button>
