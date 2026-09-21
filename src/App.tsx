@@ -89,6 +89,19 @@ function App() {
               rely on a single implicit mechanism for "fill the row's
               height" when an explicit one is one class away. */}
           <main className="grid min-h-0 flex-1 grid-cols-4 gap-4 p-4">
+            <div className="col-span-2 flex h-full min-h-0 min-w-0 flex-col">
+              <DocumentPreviewPanel
+                parsedDocx={state.parsedDocx}
+                styleReport={state.styleReport}
+                selectedVariantIds={state.selectedVariantIds}
+                selectableStyleReport={unmergedStyleReport}
+                onToggleVariant={actions.toggleSelectVariant}
+                paragraphMarkers={paragraphMarkers}
+                referenceDoc={state.referenceDoc}
+                isMergingContent={state.isMergingContent}
+                onOpenContentMerge={actions.openContentMergeDialog}
+              />
+            </div>
             <div className="col-span-1 flex h-full min-h-0 min-w-0 flex-col">
               <StyleReportPanel
                 styleReport={unmergedStyleReport}
@@ -128,17 +141,6 @@ function App() {
                 isCustomizeOpen={isCustomizeOpen}
                 enabledDefaultStyleNames={enabledDefaultStyleNames}
                 onToggleDefaultStyleEnabled={actions.toggleDefaultStyleEnabled}
-              />
-            </div>
-            <div className="col-span-2 flex h-full min-h-0 min-w-0 flex-col">
-              <DocumentPreviewPanel
-                parsedDocx={state.parsedDocx}
-                styleReport={state.styleReport}
-                selectedVariantIds={state.selectedVariantIds}
-                paragraphMarkers={paragraphMarkers}
-                referenceDoc={state.referenceDoc}
-                isMergingContent={state.isMergingContent}
-                onOpenContentMerge={actions.openContentMergeDialog}
               />
             </div>
           </main>

@@ -885,3 +885,47 @@ Headings, "List Bullet 1-3"/"List Number 1-3" under Lists). Clicking a row
 inside a group still selects it as the merge target (amber highlight +
 checked box), unchanged from before grouping was added. `npm run
 build`/`test` (91/91)/`lint` all pass.
+
+### 2026-09-21 — Click text in Document Preview to select it in Current Styles
+*(branch `feature/preview-click-to-select`, not yet merged)*
+
+Reverse of the existing Current Styles → preview highlight. Clicking a run in
+`DocumentPreviewPanel` now toggles that run's variant in the same
+`selectedVariantIds` set the list drives (`actions.toggleSelectVariant`), so the
+list row checks/highlights and every occurrence highlights in the preview.
+
+- `DocumentPreviewPanel` takes two new props: `selectableStyleReport` (App
+  passes `unmergedStyleReport`) and `onToggleVariant`. A run is only clickable
+  (pointer cursor + hover tint) when its variant is in the *visible* list —
+  otherwise a click could select an already-merged variant the list doesn't
+  show, enabling "Mash it" on nothing visible.
+- A click that ends a text drag-selection (`window.getSelection()` non-empty)
+  is ignored.
+- The preview's existing "scroll first newly-selected occurrence into view"
+  effect is skipped for selections that originated in the preview itself
+  (`selectionFromPreviewRef`), so clicking doesn't recentre the text under the
+  cursor.
+- `StyleReportPanel` gained the matching scroll: the first newly-selected row
+  is scrolled into view (`block: 'nearest'`, so a no-op for a row clicked in
+  the list). Rows carry `data-variant-id` (`StyleVariantRow`) for lookup.
+- Tests 91 → 93: `tests/documentPreviewClick.interaction.test.tsx`. Build,
+  tests and lint pass (only the known `no-constant-binary-expression` warning).
+- **Verified in Chrome** (dev server, `public/CLEAN-STYLES.docx`): clicking a
+  preview run checks its row, highlights every occurrence and scrolls the row
+  into view (list scrolled to exactly the `nearest` edge, no overshoot); the
+  preview's own scroll position is unchanged by the click; clicking again
+  deselects; a text drag-selection doesn't toggle anything; after merging a
+  style into "Normal" its text is no longer clickable while unmerged text
+  still is; no console errors. One unreproduced oddity: on the very first run
+  the list once ended up ~1 viewport past the selected row; four later repeats
+  (including a fresh load + upload) all landed correctly. Keep an eye out.
+
+#### Layout: Document Preview is now the leftmost panel
+
+Per request, panel order is now Document Preview → Current styles → New Styles
+(`App.tsx`; the preview keeps its `col-span-2`, the other two `col-span-1`).
+The preview header also gained a right-aligned hint, "Click text to select a
+style". Copy that named panel positions was updated to match: the preview's
+info tooltip ("panels to the right"), `README.md`'s walkthrough, and
+`src/content/help-content.md` ("entries on the left/right" → "in Current
+styles"/"in New Styles"), which now also documents click-to-select.

@@ -15,6 +15,14 @@ interface DocumentPreviewPanelProps {
    * checking a row both stages it for "Do it" and highlights every place it
    * occurs in the live preview, with no separate UI to keep in sync. */
   selectedVariantIds: Set<string>
+  /** The entries currently listed in Current Styles (i.e. minus the ones
+   * already merged away) - a preview run is only clickable when its variant
+   * appears here, so a click can never select something the list doesn't
+   * show. */
+  selectableStyleReport: StyleEntity[]
+  /** Reverse of the Style Report -> preview highlight: clicking a run here
+   * toggles that run's variant in the same selection the list drives. */
+  onToggleVariant: (variantId: string) => void
   /** Resolved list marker ("1.", "b)", "•"...) per paragraph, from the same
    * pass StyleReportPanel uses - keeps a numbered/bulleted paragraph looking
    * like a list here too, instead of silently dropping its marker. */
@@ -58,6 +66,8 @@ export function DocumentPreviewPanel({
   parsedDocx,
   styleReport,
   selectedVariantIds,
+  selectableStyleReport,
+  onToggleVariant,
   paragraphMarkers,
   referenceDoc,
   isMergingContent,
@@ -78,6 +88,31 @@ export function DocumentPreviewPanel({
     }
     return map
   }, [styleReport])
+
+  // Which selectable variant each run belongs to - what makes a run clickable.
+  const runVariantIds = useMemo(() => {
+    const map = new Map<Element, string>()
+    for (const entity of selectableStyleReport) {
+      for (const variant of entity.variants) {
+        for (const ref of variant.runRefs) map.set(ref.runElement, variant.id)
+      }
+    }
+    return map
+  }, [selectableStyleReport])
+
+  // Set by a click in this panel so the scroll effect below can skip the one
+  // selection change that this panel itself caused - the user is already
+  // looking at that text, and re-centering it under their cursor is jarring.
+  const selectionFromPreviewRef = useRef(false)
+
+  const handleRunClick = (runElement: Element) => {
+    const variantId = runVariantIds.get(runElement)
+    if (!variantId) return
+    // A drag-to-select-text gesture also ends in a click - leave that alone.
+    if (window.getSelection()?.toString()) return
+    selectionFromPreviewRef.current = true
+    onToggleVariant(variantId)
+  }
 
   const paragraphs = useMemo<PreviewParagraph[]>(() => {
     if (!parsedDocx) return []
@@ -140,7 +175,9 @@ export function DocumentPreviewPanel({
   useEffect(() => {
     const newlyAdded = [...selectedVariantIds].filter((id) => !prevScrolledIdsRef.current.has(id))
     prevScrolledIdsRef.current = selectedVariantIds
-    if (newlyAdded.length === 0) return
+    const causedByPreviewClick = selectionFromPreviewRef.current
+    selectionFromPreviewRef.current = false
+    if (causedByPreviewClick || newlyAdded.length === 0) return
 
     for (const entity of styleReport) {
       for (const variant of entity.variants) {
@@ -158,9 +195,10 @@ export function DocumentPreviewPanel({
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
           Document Preview
           <InfoTooltip
-            text={`${parsedDocx?.originalFilename ?? 'Live preview'} — This is a "style only" preview of your document. It will not display your page flow correctly but that's OK, that's not what this tool is for. To merge your style with approved styles, use the panels to the left.`}
+            text={`${parsedDocx?.originalFilename ?? 'Live preview'} — This is a "style only" preview of your document. It will not display your page flow correctly but that's OK, that's not what this tool is for. To merge your style with approved styles, use the panels to the right.`}
           />
         </h2>
+        <span className="text-xs text-slate-500">Click text to select a style</span>
       </div>
 
       <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
@@ -205,7 +243,10 @@ export function DocumentPreviewPanel({
                             else runNodesRef.current.delete(run.runElement)
                           }}
                           style={run.css}
+                          onClick={() => handleRunClick(run.runElement)}
                           className={`rounded-sm transition-colors duration-700 ${
+                            runVariantIds.has(run.runElement) ? 'cursor-pointer hover:bg-indigo-100' : ''
+                          } ${
                             isFlashed
                               ? 'bg-emerald-200 ring-2 ring-emerald-400'
                               : isHighlighted

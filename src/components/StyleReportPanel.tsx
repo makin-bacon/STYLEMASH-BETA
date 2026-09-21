@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { StyleEntity, StyleEntityVariant } from '../types/ooxml'
 import type { ParagraphMarker } from '../lib/ooxml/numbering'
 import { signatureToCss } from '../lib/signatureToCss'
@@ -75,6 +76,27 @@ export function StyleReportPanel({
   onUndo,
   onRipAnotherFile,
 }: StyleReportPanelProps) {
+  const listRef = useRef<HTMLUListElement>(null)
+  const prevSelectedIdsRef = useRef<Set<string>>(new Set())
+
+  // A selection made in the Document Preview (click a run) may pick a row
+  // that's scrolled out of view here - bring the first newly-selected row
+  // into view. `nearest` makes it a no-op for a row the user just clicked
+  // in this list themselves, which is already visible.
+  useEffect(() => {
+    const prev = prevSelectedIdsRef.current
+    prevSelectedIdsRef.current = selectedIds
+    const newlyAdded = [...selectedIds].filter((id) => !prev.has(id))
+    if (newlyAdded.length === 0) return
+    const rows = listRef.current?.querySelectorAll<HTMLElement>('[data-variant-id]') ?? []
+    for (const row of rows) {
+      if (row.dataset.variantId === newlyAdded[0]) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        return
+      }
+    }
+  }, [selectedIds])
+
   const percentMerged =
     mergeProgress.total === 0 ? 100 : Math.round((mergeProgress.merged / mergeProgress.total) * 100)
   const allMatched = mergeProgress.total > 0 && mergeProgress.remaining === 0
@@ -94,7 +116,7 @@ export function StyleReportPanel({
         </button>
       </div>
 
-      <ul className="min-h-0 flex-1 overflow-y-auto">
+      <ul ref={listRef} className="min-h-0 flex-1 overflow-y-auto">
         {allMatched ? (
           <li className="flex h-full items-center justify-center px-4 py-6 text-center text-sm text-slate-400">
             <p>
