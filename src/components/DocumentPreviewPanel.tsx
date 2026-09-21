@@ -195,9 +195,10 @@ export function DocumentPreviewPanel({
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
           Document Preview
           <InfoTooltip
-            text={`${parsedDocx?.originalFilename ?? 'Live preview'} — This is a "style only" preview of your document. It will not display your page flow correctly but that's OK, that's not what this tool is for. To merge your style with approved styles, use the panels to the left.`}
+            text={`${parsedDocx?.originalFilename ?? 'Live preview'} — This is a "style only" preview of your document. It will not display your page flow correctly but that's OK, that's not what this tool is for. To merge your style with approved styles, use the panels to the right.`}
           />
         </h2>
+        <span className="text-xs text-slate-500">Click text to select a style</span>
       </div>
 
       <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-3">

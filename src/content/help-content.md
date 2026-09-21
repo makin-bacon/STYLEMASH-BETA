@@ -12,9 +12,9 @@ Only .docx and .dotx are supported (the modern Office Open XML format). An old .
 
 ## Current styles: what's actually in your document
 
-The left-hand "Current styles" panel lists every distinct text appearance StyleMash found in the document - most common first - however it got its look, whether that's a named Word style or formatting applied by hand with no style behind it. Each entry shows a live preview, its resolved font, size, colour, bold, italic, underline and strikethrough, and where that look came from.
+The middle "Current styles" panel lists every distinct text appearance StyleMash found in the document - most common first - however it got its look, whether that's a named Word style or formatting applied by hand with no style behind it. Each entry shows a live preview, its resolved font, size, colour, bold, italic, underline and strikethrough, and where that look came from.
 
-Tick the checkbox on any entry, or click the row, to select it. Select as many entries as you like before merging them together.
+Tick the checkbox on any entry, or click the row, to select it. You can also click any text in the Document Preview on the left - its entry is selected here, and every place it occurs is highlighted. Click it again to deselect. Select as many entries as you like before merging them together.
 
 ## New Styles: where merged text ends up
 
@@ -30,8 +30,8 @@ Click "Edit" on any New Styles entry later to change its look.
 
 There are two ways to merge selected entries into a style:
 
-1. Select one or more entries on the left, then click a style's row on the right to mark it as the target - its background turns amber to show it is picked. Click "Merge N selected here" on that row, or click "Mash it" on the left, which does the same thing once a target is already picked. This merges immediately, with no extra dialog.
-2. Select one or more entries on the left and click "Mash it" without picking a target first. A dialog opens where you can either create a brand-new style on the spot or pick an existing one from New Styles, then confirm.
+1. Select one or more entries in Current styles, then click a style's row in New Styles to mark it as the target - its background turns amber to show it is picked. Click "Merge N selected here" on that row, or click "Mash it" in Current styles, which does the same thing once a target is already picked. This merges immediately, with no extra dialog.
+2. Select one or more entries in Current styles and click "Mash it" without picking a target first. A dialog opens where you can either create a brand-new style on the spot or pick an existing one from New Styles, then confirm.
 
 Either way, every selected entry's text is re-styled to match the target style, which now covers that formatting wherever it appears in the document.
 

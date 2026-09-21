@@ -910,4 +910,22 @@ list row checks/highlights and every occurrence highlights in the preview.
   the list). Rows carry `data-variant-id` (`StyleVariantRow`) for lookup.
 - Tests 91 → 93: `tests/documentPreviewClick.interaction.test.tsx`. Build,
   tests and lint pass (only the known `no-constant-binary-expression` warning).
-- Not verified in a real browser yet.
+- **Verified in Chrome** (dev server, `public/CLEAN-STYLES.docx`): clicking a
+  preview run checks its row, highlights every occurrence and scrolls the row
+  into view (list scrolled to exactly the `nearest` edge, no overshoot); the
+  preview's own scroll position is unchanged by the click; clicking again
+  deselects; a text drag-selection doesn't toggle anything; after merging a
+  style into "Normal" its text is no longer clickable while unmerged text
+  still is; no console errors. One unreproduced oddity: on the very first run
+  the list once ended up ~1 viewport past the selected row; four later repeats
+  (including a fresh load + upload) all landed correctly. Keep an eye out.
+
+#### Layout: Document Preview is now the leftmost panel
+
+Per request, panel order is now Document Preview → Current styles → New Styles
+(`App.tsx`; the preview keeps its `col-span-2`, the other two `col-span-1`).
+The preview header also gained a right-aligned hint, "Click text to select a
+style". Copy that named panel positions was updated to match: the preview's
+info tooltip ("panels to the right"), `README.md`'s walkthrough, and
+`src/content/help-content.md` ("entries on the left/right" → "in Current
+styles"/"in New Styles"), which now also documents click-to-select.
