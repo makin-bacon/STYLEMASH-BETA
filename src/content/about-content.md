@@ -48,15 +48,15 @@ Not every default style is useful for every document. Click "Customise your own 
 
 ## Using a second Word file as your style source
 
-If you already have a clean, approved Word document with the styles you want everything to match, click "Upload your own" in the New Styles panel footer. Every named style it defines is imported as an extra merge target, tagged "from Document B" so you can tell them apart from styles you built by hand. Click "Remove Document B" to detach it again - any of its styles you never actually merged into are removed along with it, so nothing unused is left behind.
+If you already have a clean, approved Word document with the styles you want everything to match, click "Upload your own" (the very bottom row of New Styles). Every named style it defines is imported as an extra merge target, tagged "from Document B" so you can tell them apart from styles you built by hand. Click "Remove Document B" to detach it again - any of its styles you never actually merged into are removed along with it, so nothing unused is left behind.
 
 ## Undo, clearing, and starting over
 
-"Undo", next to "Mash it" at the bottom of New Styles, reverts the most recent merge or "Clear list", one step at a time. "Clear list" wipes every New Styles entry you have created this session. "Mash a different file" takes you back to the upload screen to start over with a new document.
+"Undo", next to "Mash it" at the bottom of New Styles, reverts the most recent merge or "Clear list", one step at a time. "Clear list" (the very bottom row, beside "Upload your own") wipes every New Styles entry you have created this session. "Mash a different file" takes you back to the upload screen to start over with a new document.
 
 ## Saving your result
 
-Click "Save your file" (bottom of New Styles) at any time to download the cleaned document. It keeps the original file format and filename, with "-MASHED" appended - for example, Report.docx becomes Report-MASHED.docx. Saving does not end your session; keep merging and save again whenever you like.
+Click "Save your file" (bottom of New Styles, just below "Undo" and "Mash it") at any time to download the cleaned document. It keeps the original file format and filename, with "-MASHED" appended - for example, Report.docx becomes Report-MASHED.docx. Saving does not end your session; keep merging and save again whenever you like.
 
 If Word ever shows a "needs repair" prompt when you open a saved file, that is a bug - please report it, with the document (or a minimal example) attached if you can.
 
