@@ -6,7 +6,7 @@ interface SaveButtonProps {
 }
 
 /** Always-available save action. Downloads the (possibly edited) document
- * locally in its original format, filename suffixed with "-RIPPED" - never
+ * locally in its original format, filename suffixed with "-MASHED" - never
  * uploads anything anywhere, since StyleMash does all processing
  * client-side in the browser. Rendered in UserStylesPanel's footer, below
  * the Undo/"Mash it" row. Bright `green-400` - the same green as the
@@ -18,7 +18,7 @@ export function SaveButton({ disabled, isSaving, onSave, className = '' }: SaveB
       type="button"
       disabled={disabled || isSaving}
       onClick={onSave}
-      className={`rounded-md bg-green-400 px-3 py-1.5 text-xs font-semibold text-chrome enabled:hover:bg-green-300 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg ${className}`}
+      className={`rounded-md bg-green-400 px-3 py-1.5 text-xs font-semibold text-chrome enabled:hover:bg-green-300 disabled:cursor-not-allowed disabled:bg-chrome-hover disabled:text-chrome-dim ${className}`}
     >
       {isSaving ? 'Saving…' : 'Save your file'}
     </button>

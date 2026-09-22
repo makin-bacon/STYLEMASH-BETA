@@ -223,7 +223,7 @@ interface UserStylesPanelProps {
   /** Surfaced here (not just in MergeDialog) since MERGE_SELECTED_INTO_TARGET
    * has no dialog of its own to show it in. */
   mergeError: string | null
-  /** Drives the footer's "Attach custom Word styles" button while nothing's
+  /** Drives the footer's "Upload your own" button while nothing's
    * attached, and its "Remove Document B" button once one is - same footer
    * slot either way, just swapping which button occupies it. */
   referenceDoc: ReferenceDocState
@@ -369,60 +369,67 @@ export function UserStylesPanel({
           })()}
       </ul>
 
-      {/* Always rendered (never conditionally mounted) so this row's height
-          never changes as Document B is attached/removed - same reasoning
-          as DocumentPreviewPanel's own footer row. "Clear list" always
-          occupies the left half; the right half still swaps between
-          Attach/Remove Document B depending on referenceDoc.status. */}
-      <div className="flex gap-2 border-t border-line px-4 py-2">
-        <button
-          type="button"
-          disabled={userStyles.length === 0}
-          onClick={onClearUserStyles}
-          className="flex-1 rounded-md border border-line-strong px-3 py-1.5 text-xs font-medium text-ink-3 enabled:hover:bg-soft disabled:cursor-not-allowed disabled:text-ink-6"
-        >
-          Clear list
-        </button>
-        <div className="flex-1">
-          {referenceDoc.status === 'loaded' ? (
+      {/* Footer, top to bottom: [Undo | Mash it], Save your file, then
+          [Clear list | Upload your own]. The merge actions come first -
+          pick text -> pick a target above -> Mash it -> Save. Undo sits
+          immediately left of "Mash it" (undoing the last merge and staging
+          the next are the same gesture); Save is a full-width row of its own,
+          since it's a step you take once you're done merging. This panel only
+          mounts once a document is loaded (see App.tsx), so Save is never
+          gated on document state - SaveButton's own `isSaving` disables it
+          mid-download. All three rows share the panel title bar's `bg-chrome`
+          (so the panel is bracketed top and bottom by one colour); their
+          controls use the light-on-dark `chrome-*` tokens, incl. disabled
+          states. */}
+      <div data-tour="mash-footer" className="border-t border-line bg-chrome">
+        <div className="px-4 pb-2 pt-2">
+          <div className="flex gap-2">
+            <UndoButton disabled={!canUndo} onUndo={onUndo} />
             <button
               type="button"
-              onClick={onRemoveReferenceDoc}
-              className="w-full rounded-md border border-line-strong px-3 py-1.5 text-xs font-medium text-ink-3 hover:bg-soft"
+              disabled={pendingSelectionCount === 0}
+              onClick={onMashIt}
+              className="flex-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-chrome-hover disabled:text-chrome-dim"
             >
-              Remove Document B
+              Mash it {pendingSelectionCount > 0 ? `(${pendingSelectionCount})` : ''}
             </button>
-          ) : (
-            <AttachReferenceDocButton
-              status={referenceDoc.status}
-              errorMessage={referenceDoc.errorMessage}
-              onAttach={onAttachReferenceDoc}
-            />
-          )}
+          </div>
+          <SaveButton disabled={false} isSaving={isSaving} onSave={onSave} className="mt-2 w-full" />
         </div>
-      </div>
 
-      {/* The merge actions live here, at the bottom of the panel where the
-          workflow ends: pick text -> pick a target above -> Mash it -> Save.
-          Undo sits immediately left of "Mash it" (undoing the last merge and
-          staging the next are the same gesture); Save is a full-width row of
-          its own, since it's a step you take once you're done merging. This
-          panel only mounts once a document is loaded (see App.tsx), so Save
-          is never gated on document state - SaveButton's own `isSaving`
-          disables it mid-download. */}
-      <div data-tour="mash-footer" className="border-t border-line px-4 py-2">
-        <div className="flex gap-2">
-          <UndoButton disabled={!canUndo} onUndo={onUndo} />
+        {/* Always rendered (never conditionally mounted) so this row's height
+            never changes as Document B is attached/removed - same reasoning
+            as DocumentPreviewPanel's own footer row. "Clear list" always
+            occupies the left half; the right half still swaps between
+            Upload your own / Remove Document B depending on
+            referenceDoc.status. Bottom row of the footer (see above). */}
+        <div className="flex gap-2 px-4 pb-2">
           <button
             type="button"
-            disabled={pendingSelectionCount === 0}
-            onClick={onMashIt}
-            className="flex-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-fg"
+            disabled={userStyles.length === 0}
+            onClick={onClearUserStyles}
+            className="flex-1 rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg enabled:hover:bg-chrome-hover disabled:cursor-not-allowed disabled:text-chrome-dim"
           >
-            Mash it {pendingSelectionCount > 0 ? `(${pendingSelectionCount})` : ''}
+            Clear list
           </button>
+          <div className="flex-1">
+            {referenceDoc.status === 'loaded' ? (
+              <button
+                type="button"
+                onClick={onRemoveReferenceDoc}
+                className="w-full rounded-md border border-chrome-edge px-3 py-1.5 text-xs font-medium text-chrome-fg hover:bg-chrome-hover"
+              >
+                Remove Document B
+              </button>
+            ) : (
+              <AttachReferenceDocButton
+                status={referenceDoc.status}
+                errorMessage={referenceDoc.errorMessage}
+                onAttach={onAttachReferenceDoc}
+              />
+            )}
+          </div>
         </div>
-        <SaveButton disabled={false} isSaving={isSaving} onSave={onSave} className="mt-2 w-full" />
       </div>
     </div>
   )

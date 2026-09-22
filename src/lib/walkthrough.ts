@@ -58,7 +58,7 @@ export const WORKSPACE_STEPS: DriveStep[] = [
     popover: {
       title: 'Choose where it should end up',
       description:
-        'Add a starter set with <strong>+ Defaults</strong>, build your own with <strong>+ New Style</strong>, or attach the styles from another Word file. Click a style to make it the target.',
+        'Add a starter set with <strong>+ Defaults</strong>, create one with <strong>+ New Style</strong>, or bring in the styles from another Word file with <strong>Upload your own</strong> (bottom row of the panel). Click a style to make it the target.',
       side: 'left',
       align: 'start',
     },
@@ -68,7 +68,7 @@ export const WORKSPACE_STEPS: DriveStep[] = [
     popover: {
       title: 'Mash it, then save',
       description:
-        "Down here, <strong>Mash it</strong> folds your selection into the target style (<strong>Undo</strong> is right beside it). Repeat until you're happy, then <strong>Save your file</strong>.",
+        "Down here, <strong>Mash it</strong> folds your selection into the target style (<strong>Undo</strong> is right beside it). Repeat until you're happy, then <strong>Save your file</strong>. The very last row holds <strong>Clear list</strong> and <strong>Upload your own</strong>.",
       side: 'left',
       align: 'end',
     },

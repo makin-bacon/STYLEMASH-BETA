@@ -124,7 +124,7 @@ function App() {
                 onBulkMergeMatched={actions.bulkMergeMatchedToReference}
                 mergeProgress={mergeProgress}
                 onSave={actions.save}
-                onRipAnotherFile={actions.reset}
+                onMashAnotherFile={actions.reset}
               />
             </div>
             <div className="col-span-1 flex h-full min-h-0 min-w-0 flex-col">

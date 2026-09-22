@@ -78,6 +78,27 @@ hardcoded `false`, awaiting more work:
 - **Merge content into Document B** — `CONTENT_MERGE_ENABLED` in
   `src/components/DocumentPreviewPanel.tsx`.
 
+## Standing rule: UI changes update the docs and the walkthrough
+
+**Any time the UI changes (a label, a button's position or order, a panel's
+layout, a new/removed control, a renamed feature), update the user-facing docs
+and the guided tour in the same change** - the owner asked for this explicitly.
+Stale button names/positions have already slipped through several times.
+Checklist (grep for the old label/position first):
+
+- `src/lib/walkthrough.ts` - step copy **and** the `data-tour="..."` anchors on
+  the components. Check the spotlight still covers what the step's text names
+  (e.g. the last step highlights the whole New Styles footer). The step strings
+  are JS string literals: watch quotes/apostrophes.
+- `src/content/about-content.md` - the About modal's text (plain prose; blank
+  lines separate paragraphs; `- ` bullets; see its 2026-09-21 changelog entry).
+- `README.md` - "Using the app" walkthrough steps.
+- In-UI copy that names controls: the New Styles empty-state text
+  (`UserStylesPanel.tsx`) and panel info tooltips.
+- Tests that assert labels or tour anchors (`tests/walkthrough*.test.*`,
+  `tests/appHeader.interaction.test.tsx`).
+- A dated entry at the bottom of this file, and verify the tour step in Chrome.
+
 ## Gotchas for a fresh session
 
 - **This became a git repository mid-session on 2026-09-18** (single
@@ -1269,3 +1290,55 @@ Disabled state unchanged (`bg-disabled`/`text-disabled-fg`). Doc comment updated
 Build/tests/lint pass; **not eyeballed in a browser** (Chrome extension was
 disconnected) - worth a quick look at the button (esp. the hover shade) in both
 themes.
+
+### 2026-09-22 - "Upload your own" button label; saved files end in "-MASHED"
+*(branch `feature/upload-your-own-mashed`, stacked on the unmerged `feature/save-button-green`)*
+
+- **"Attach custom Word styles" -> "Upload your own"** (`AttachReferenceDocButton.tsx`;
+  its loading label "Reading reference document..." is unchanged, and the
+  companion "Remove Document B" button keeps its name). Kept in sync in: the tour's
+  New Styles step (now "...create one with + New Style, or bring in the styles from
+  another Word file with **Upload your own**" - careful, that string is single-quoted
+  JS, so no apostrophes), `about-content.md` (2 places), `README.md` step 7, and
+  the `UserStylesPanel` comment.
+- **Saved filename suffix `-RIPPED` -> `-MASHED`** (`Report.docx` -> `Report-MASHED.docx`):
+  `serializeDocx.ts#buildRippedFilename` renamed **`buildMashedFilename`**;
+  `serializeRoundtrip.test.ts` expectations, `SaveButton` comment, `README.md` step 11
+  and `about-content.md` updated. Older changelog entries above still say `-RIPPED`
+  - history only.
+- Also renamed the internal prop `onRipAnotherFile` -> `onMashAnotherFile`
+  (`StyleReportPanel`/`App`), which belongs to the "Mash a different file" button.
+- Build, 123 tests, lint pass.
+
+#### Follow-up: New Styles footer takes the header colour
+*(same branch, `feature/upload-your-own-mashed`)*
+
+Both footer rows in `UserStylesPanel` ([Clear list | Upload your own] and
+[Undo | Mash it] + Save) now use the New Styles title bar's `bg-chrome`; the
+divider between the two rows was dropped so they read as one footer. Their
+controls moved to the light-on-dark chrome tokens: the outline buttons ("Clear
+list", "Remove Document B") use `border-chrome-edge` / `text-chrome-fg` /
+`hover:bg-chrome-hover`, and the **disabled state of Undo, Mash it, Save and
+Upload your own** is now `bg-chrome-hover` + `text-chrome-dim` (the old pale
+`disabled:bg-disabled` chip would glare on a dark bar in light mode). Contrast
+(computed): disabled text ~4-5:1 on its chip, fg text ~15:1 on the bar. The
+`disabled`/`disabled-fg` tokens are still used by `ContentMergeDialog` and the
+hidden preview merge button. **Not eyeballed in a browser** (Chrome extension
+disconnected) - please check both themes, especially the disabled buttons.
+
+### 2026-09-22 - New Styles footer reordered; docs/tour audit made a standing rule
+*(branch `feature/upload-your-own-mashed`)*
+
+New Styles footer order, top to bottom: **`[Undo | Mash it]`, `Save your file`,
+then `[Clear list | Upload your own]`** (was Clear/Upload on top, Undo/Mash/Save
+below). All three rows sit in one `data-tour="mash-footer"` wrapper
+(`UserStylesPanel.tsx`) with a single top border and `bg-chrome`; gaps between
+rows are an even 8px (measured in Chrome). The walkthrough's last step now
+spotlights the **whole footer** (was only Undo/Mash/Save) and its text adds
+"The very last row holds Clear list and Upload your own"; step 3 says Upload your
+own is in the panel's "bottom row". README steps 7/8/11 and `about-content.md`
+(Upload your own, Clear list, Save) now give the precise positions.
+
+**New standing rule (also saved to assistant memory): every UI change must update
+the docs and the walkthrough** - see the new "Standing rule" section near the top
+of this file for the checklist.
