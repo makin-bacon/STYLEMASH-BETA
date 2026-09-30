@@ -1,5 +1,11 @@
 import type { ParsedDocx, StyleEntity, UserStyleRecord } from '../../types/ooxml'
-import { findSameNamedStyleId, mergeParagraphStyle, mergeStyles, removeStyleById } from './mergeStyles'
+import {
+  findSameNamedStyleId,
+  mergeParagraphStyle,
+  mergeStyles,
+  removeStyleById,
+  resolveUserStyleName,
+} from './mergeStyles'
 import { buildStylePreviewMarker, copyListDefinition, resolveStyleListFormat, resolveStyleNumPr } from './numbering'
 import { countOccurrencesForStyleId } from './styleReport'
 import { buildResolutionContext, buildStylesMap, getDocDefaultsRPr, resolveStyleRPr } from './styleResolution'
@@ -111,16 +117,17 @@ export function materializeReferenceDocStyles(
       if (aNumId !== null) listNumPr = { numId: aNumId, ilvl: bNumPr.ilvl }
     }
 
-    const collision = existingByName.get(bStyle.name.toLowerCase())
-    const adopted = !collision && findSameNamedStyleId(targetDocx.stylesXml, bStyle.name, kind) !== null
+    const name = resolveUserStyleName(targetDocx.stylesXml, bStyle.name, kind)
+    const collision = existingByName.get(name.toLowerCase())
+    const adopted = !collision && findSameNamedStyleId(targetDocx.stylesXml, name, kind) !== null
     const newStyleId =
       kind === 'character'
-        ? mergeStyles(targetDocx, [], signature, bStyle.name, collision?.styleId)
+        ? mergeStyles(targetDocx, [], signature, name, collision?.styleId)
         : mergeParagraphStyle(
             targetDocx,
             [],
             signature,
-            bStyle.name,
+            name,
             listFormat,
             collision?.styleId,
             listNumPr,
@@ -128,7 +135,7 @@ export function materializeReferenceDocStyles(
 
     const record: UserStyleRecord = {
       styleId: newStyleId,
-      name: bStyle.name,
+      name,
       targetSignature: signature,
       kind,
       listFormat,

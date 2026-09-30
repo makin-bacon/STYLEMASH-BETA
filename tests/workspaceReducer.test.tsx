@@ -169,6 +169,24 @@ describe('useDocxWorkspace under StrictMode', () => {
     w.cleanup()
   })
 
+  it('"+ Defaults" names the bundled character "Normal" NormalUser next to the document\'s paragraph Normal, once', async () => {
+    const w = await mountWorkspace(`<?xml version="1.0"?><w:styles ${W}>
+      <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
+    </w:styles>`)
+    act(() => w.api.actions.addDefaultStyles())
+    act(() => w.api.actions.addDefaultStyles())
+
+    const normal = w.api.state.userStyles.filter((r) => r.name.startsWith('Normal'))
+    expect(normal.map((r) => [r.name, r.styleId])).toEqual([
+      ['NormalUser', 'NormalUser'],
+      ['Normal Bold', 'NormalBold'],
+    ])
+    expect(normal[0].adoptedFromDocument).toBeUndefined()
+    // The document's own Normal plus one of each default - nothing doubled.
+    expect(w.styleIds()).toHaveLength(DEFAULT_STYLES.length + 1)
+    w.cleanup()
+  })
+
   it('enabledDefaultStyleNames starts with every DEFAULT_STYLES name checked', async () => {
     const w = await mountWorkspace()
     expect(w.api.enabledDefaultStyleNames).toEqual(new Set(DEFAULT_STYLES.map((d) => d.name)))

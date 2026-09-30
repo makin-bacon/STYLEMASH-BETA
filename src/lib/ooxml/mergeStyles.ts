@@ -39,6 +39,39 @@ export function findSameNamedStyleId(
   return null
 }
 
+/** Suffix for a StyleMash style whose name or id would otherwise clash with
+ * one of the document's own - "NormalUser" rather than Word's "Normal1" -
+ * so it's obvious in Word's style list which one StyleMash made. */
+export const USER_STYLE_SUFFIX = 'User'
+
+/** The name StyleMash should actually give a new/redefined style: `name`
+ * itself, unless the document already has a style of a *different* type
+ * with that name (e.g. the bundled character style "Normal" next to Word's
+ * paragraph style "Normal"). Word won't keep two such styles under one name
+ * - it renames ours "Normal1" on open - so it becomes "NormalUser" (then
+ * "NormalUser2", ...) instead. A *same*-type clash isn't renamed: that style
+ * is adopted (findSameNamedStyleId). Idempotent - resolving a name this
+ * already returned gives it back unchanged. */
+export function resolveUserStyleName(
+  stylesXml: XMLDocument,
+  name: string,
+  type: 'paragraph' | 'character',
+): string {
+  const stylesRoot = stylesXml.getElementsByTagNameNS(NS.w, 'styles')[0]
+  if (!stylesRoot) return name
+  const otherTypeNames = new Set<string>()
+  for (const styleEl of wChildren(stylesRoot, 'style')) {
+    if (wAttr(styleEl, 'type') === type) continue
+    const styleName = wAttr(wChild(styleEl, 'name'), 'val')
+    if (styleName) otherTypeNames.add(styleName.trim().toLowerCase())
+  }
+  const clashes = (candidate: string) => otherTypeNames.has(candidate.trim().toLowerCase())
+  if (!clashes(name)) return name
+  let candidate = `${name}${USER_STYLE_SUFFIX}`
+  for (let n = 2; clashes(candidate); n++) candidate = `${name}${USER_STYLE_SUFFIX}${n}`
+  return candidate
+}
+
 function slugify(name: string): string {
   const cleaned = name.replace(/[^a-zA-Z0-9]/g, '')
   const base = cleaned.length > 0 ? cleaned : 'Style'
@@ -46,17 +79,17 @@ function slugify(name: string): string {
 }
 
 /** Generates a styleId guaranteed not to collide with any existing
- * @w:styleId in this document, by slugifying `name` and appending -1, -2...
- * on collision. */
+ * @w:styleId in this document, by slugifying `name` and appending "User",
+ * then "User2", "User3"... on collision (see USER_STYLE_SUFFIX). */
 export function generateUniqueStyleId(stylesXml: XMLDocument, name: string): string {
   // Compared case-insensitively: "heading1" next to an existing "Heading1"
   // is asking for trouble in consumers that fold case.
   const existing = new Set([...collectExistingStyleIds(stylesXml)].map((id) => id.toLowerCase()))
   const base = slugify(name)
   if (!existing.has(base.toLowerCase())) return base
-  let n = 1
-  while (existing.has(`${base}${n}`.toLowerCase())) n++
-  return `${base}${n}`
+  let candidate = `${base}${USER_STYLE_SUFFIX}`
+  for (let n = 2; existing.has(candidate.toLowerCase()); n++) candidate = `${base}${USER_STYLE_SUFFIX}${n}`
+  return candidate
 }
 
 export function findStyleElementById(stylesRoot: Element, styleId: string): Element | null {
@@ -195,6 +228,7 @@ export function mergeStyles(
   }
 
   let styleId: string
+  name = resolveUserStyleName(stylesXml, name, 'character')
   const reuseId = reuseExistingStyleId ?? findSameNamedStyleId(stylesXml, name, 'character') ?? undefined
 
   if (reuseId) {
@@ -433,6 +467,7 @@ export function mergeParagraphStyle(
   }
 
   let styleId: string
+  name = resolveUserStyleName(stylesXml, name, 'paragraph')
   const reuseId = reuseExistingStyleId ?? findSameNamedStyleId(stylesXml, name, 'paragraph') ?? undefined
 
   if (reuseId) {

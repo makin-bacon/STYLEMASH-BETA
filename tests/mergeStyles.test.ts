@@ -132,16 +132,39 @@ describe('mergeStyles', () => {
     expect(styleEls[0].getElementsByTagNameNS(NS.w, 'b')).toHaveLength(1)
   })
 
-  it('generates a unique styleId (case-insensitively) when only the id would collide', () => {
+  it('names a style "…User" when the document has a different-type style of that name (not Word\'s "Normal1")', () => {
     const parsedDocx = makeParsedDocx({
       documentXml: `<w:document ${W}><w:body/></w:document>`,
       stylesXml: `<w:styles ${W}>
+        <w:style w:type="paragraph" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
         <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/></w:style>
       </w:styles>`,
     })
-    // A character style can't take over the paragraph style, and "heading1"
-    // must not sit next to "Heading1".
-    const id = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'heading 1')
-    expect(id.toLowerCase()).not.toBe('heading1')
+    const nameOf = (id: string) =>
+      Array.from(parsedDocx.stylesXml.getElementsByTagNameNS(NS.w, 'style'))
+        .find((el) => el.getAttributeNS(NS.w, 'styleId') === id)!
+        .getElementsByTagNameNS(NS.w, 'name')[0]
+        .getAttributeNS(NS.w, 'val')
+
+    // A character style can't take over a paragraph style of the same name.
+    const normalId = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Normal')
+    expect([normalId, nameOf(normalId)]).toEqual(['NormalUser', 'NormalUser'])
+    const headingId = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'heading 1')
+    expect([headingId, nameOf(headingId)]).toEqual(['heading1User', 'heading 1User'])
+
+    // Asking again finds and redefines our own "NormalUser", no "NormalUser2".
+    expect(mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Normal')).toBe('NormalUser')
+    expect(parsedDocx.stylesXml.getElementsByTagNameNS(NS.w, 'style')).toHaveLength(4)
+  })
+
+  it('suffixes a colliding styleId with "User", then "User2" (case-insensitively)', () => {
+    const parsedDocx = makeParsedDocx({
+      documentXml: `<w:document ${W}><w:body/></w:document>`,
+      stylesXml: `<w:styles ${W}>
+        <w:style w:type="table" w:styleId="Callout"><w:name w:val="Callout table"/></w:style>
+        <w:style w:type="table" w:styleId="calloutuser"><w:name w:val="Callout table 2"/></w:style>
+      </w:styles>`,
+    })
+    expect(mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Callout')).toBe('CalloutUser2')
   })
 })

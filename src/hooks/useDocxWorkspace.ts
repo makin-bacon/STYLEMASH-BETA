@@ -14,7 +14,13 @@ import {
 } from '../lib/ooxml/bulkMergeMatchedStyles'
 import { buildContentMergedDocx, type ContentMergeOptions } from '../lib/ooxml/contentMerge'
 import { addDefaultStyles, DEFAULT_STYLES } from '../lib/ooxml/defaultStyles'
-import { findSameNamedStyleId, mergeParagraphStyle, mergeStyles, removeStyleById } from '../lib/ooxml/mergeStyles'
+import {
+  findSameNamedStyleId,
+  mergeParagraphStyle,
+  mergeStyles,
+  removeStyleById,
+  resolveUserStyleName,
+} from '../lib/ooxml/mergeStyles'
 import { parseDocx } from '../lib/ooxml/parseDocx'
 import {
   materializeReferenceDocStyles,
@@ -516,7 +522,7 @@ export function useDocxWorkspace() {
   const confirmMerge = useCallback(
     (
       targetProps: FormattingSignature,
-      name: string,
+      requestedName: string,
       kind: UserStyleKind,
       listFormat: ListFormat,
       reuseExistingStyleId?: string,
@@ -528,8 +534,11 @@ export function useDocxWorkspace() {
       // mergeStyles() just creates/redefines the style definition itself.
       const sourceRunRefs = collectRunRefsForVariantIds(current.styleReport, current.selectedVariantIds)
       const undoSnapshot = snapshotForUndo(current.parsedDocx, current.userStyles)
+      // The name the style really gets - "NormalUser" if the document
+      // already has a different-type "Normal" (see resolveUserStyleName).
+      const styleName = resolveUserStyleName(current.parsedDocx.stylesXml, requestedName, kind)
       const adopted =
-        !reuseExistingStyleId && findSameNamedStyleId(current.parsedDocx.stylesXml, name, kind) !== null
+        !reuseExistingStyleId && findSameNamedStyleId(current.parsedDocx.stylesXml, styleName, kind) !== null
 
       try {
         const styleId =
@@ -538,17 +547,17 @@ export function useDocxWorkspace() {
                 current.parsedDocx,
                 sourceRunRefs,
                 targetProps,
-                name,
+                styleName,
                 listFormat,
                 reuseExistingStyleId,
               )
-            : mergeStyles(current.parsedDocx, sourceRunRefs, targetProps, name, reuseExistingStyleId)
+            : mergeStyles(current.parsedDocx, sourceRunRefs, targetProps, styleName, reuseExistingStyleId)
 
         const existingIndex = current.userStyles.findIndex((r) => r.styleId === styleId)
         const effectiveListFormat = kind === 'paragraph' ? listFormat : 'none'
         const record: UserStyleRecord = {
           styleId,
-          name,
+          name: styleName,
           targetSignature: targetProps,
           kind,
           listFormat: effectiveListFormat,

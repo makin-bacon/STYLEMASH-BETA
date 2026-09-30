@@ -53,6 +53,8 @@ Merging also sets a paragraph's numbering to match the style you merge into, exa
 
 Word treats two styles with the same name as one. So when a New Styles entry has the same name as a style your document already uses - "heading 1" from "+ Defaults", for example - StyleMash redefines the document's own style rather than adding a second one. Everything already using that style changes too, including text you have not merged, and the Document Preview and Current styles show that straight away. "Clear list" and "Remove Document B" never delete a style your document had to begin with.
 
+Sometimes the matching style in your document is a different kind - Word's own "Normal" is a paragraph style, but the bundled "Normal" in "+ Defaults" is a character style. Word will not keep two of these under one name, so StyleMash adds "User" to the end of its own style's name - "NormalUser", "captionUser" - so you can always tell it apart in Word's style list.
+
 ## Choosing which bundled defaults you get
 
 Not every default style is useful for every document. Click "Customise your own style file" in the top header to open a checklist of every bundled default, grouped into "Body text styles", "Heading Styles" and "List styles". Untick anything you do not want, and the next "+ Defaults" click only adds what is still ticked. The same panel has a link to download the underlying reference Word file, if you would rather open it in Word and build your own variant.

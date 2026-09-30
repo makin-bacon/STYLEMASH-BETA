@@ -1404,3 +1404,23 @@ and by **opening the saved files in Microsoft Word and exporting to PDF**.
   Document B cases); adoption tests in `mergeStyles`/`referenceDocStyles`/
   `workspaceReducer` (Clear list keeps adopted). Build + lint clean (known
   warning only). **Not verified in Chrome** - the extension was disconnected.
+
+#### Follow-up: clashing names get a "User" suffix, not a number
+*(same branch, `feature/no-numbering-headings`)*
+
+Per request: when a StyleMash style shares its name with a *different-type*
+style in the document (the bundled character "Normal"/"caption" vs Word's
+paragraph ones), Word used to rename ours `Normal1`/`Caption1` on open.
+`mergeStyles.ts#resolveUserStyleName` now names it **`NormalUser`** (then
+`NormalUser2`, ...) up front - in the file *and* in the New Styles panel, so
+both show the same name - and `generateUniqueStyleId` suffixes colliding ids
+the same way (`User`, `User2`, ... in place of `1`, `2`). A same-type clash
+is still adopted, not renamed. Resolution is idempotent, so re-clicking
+"+ Defaults" finds and redefines the existing `NormalUser` rather than making
+`NormalUser2`. Multi-word names get no space (`Normal BoldUser`, as seen when
+CLEAN-STYLES.docx itself is loaded, since it has paragraph "Normal Bold"/
+"CRICOS/TEQSA"). Verified in Word: a re-saved file keeps `NormalUser`,
+`captionUser`, `Normal BoldUser`, `CRICOS/TEQSAUser` as-is. About text +
+README note the suffix. Tests 132 -> 134 (`mergeStyles`, `workspaceReducer`).
+No other code adds number suffixes to style names; `serializeDocx` numbers
+relationship ids (`rId…`), which aren't style names.

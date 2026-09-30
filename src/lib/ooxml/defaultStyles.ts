@@ -1,5 +1,11 @@
 import type { FormattingSignature, ListFormat, ParsedDocx, UserStyleKind, UserStyleRecord } from '../../types/ooxml'
-import { findSameNamedStyleId, mergeParagraphStyle, mergeStyles, readStyleNumPrById } from './mergeStyles'
+import {
+  findSameNamedStyleId,
+  mergeParagraphStyle,
+  mergeStyles,
+  readStyleNumPrById,
+  resolveUserStyleName,
+} from './mergeStyles'
 import { createHeadingListNumId } from './numbering'
 
 /** Groups DEFAULT_STYLES for display in the "Customise your own style file"
@@ -424,7 +430,10 @@ export function addDefaultStyles(
   // heading style already in the document) rather than minting another.
   let headingNumId: string | undefined
   for (const def of DEFAULT_STYLES) {
-    const collision = def.headingLevel === undefined ? undefined : existingByName.get(def.name.toLowerCase())
+    const collision =
+      def.headingLevel === undefined
+        ? undefined
+        : existingByName.get(resolveUserStyleName(targetDocx.stylesXml, def.name, def.kind).toLowerCase())
     const numPr = collision ? readStyleNumPrById(targetDocx.stylesXml, collision.styleId) : null
     if (numPr && numPr !== 'off') {
       headingNumId = numPr.numId
@@ -435,9 +444,11 @@ export function addDefaultStyles(
   for (const def of DEFAULT_STYLES) {
     if (!enabledNames.has(def.name)) continue
 
-    const collision = existingByName.get(def.name.toLowerCase())
-    const adopted =
-      !collision && findSameNamedStyleId(targetDocx.stylesXml, def.name, def.kind) !== null
+    // "Normal" becomes "NormalUser" next to the document's paragraph
+    // "Normal" - see resolveUserStyleName.
+    const name = resolveUserStyleName(targetDocx.stylesXml, def.name, def.kind)
+    const collision = existingByName.get(name.toLowerCase())
+    const adopted = !collision && findSameNamedStyleId(targetDocx.stylesXml, name, def.kind) !== null
     let listNumPr: { numId: string; ilvl: number } | undefined
     if (def.headingLevel !== undefined) {
       headingNumId ??= createHeadingListNumId(targetDocx)
@@ -445,12 +456,12 @@ export function addDefaultStyles(
     }
     const newStyleId =
       def.kind === 'character'
-        ? mergeStyles(targetDocx, [], def.targetSignature, def.name, collision?.styleId)
+        ? mergeStyles(targetDocx, [], def.targetSignature, name, collision?.styleId)
         : mergeParagraphStyle(
             targetDocx,
             [],
             def.targetSignature,
-            def.name,
+            name,
             def.listFormat,
             collision?.styleId,
             listNumPr,
@@ -458,7 +469,7 @@ export function addDefaultStyles(
 
     const record: UserStyleRecord = {
       styleId: newStyleId,
-      name: def.name,
+      name,
       targetSignature: def.targetSignature,
       kind: def.kind,
       listFormat: def.listFormat,
