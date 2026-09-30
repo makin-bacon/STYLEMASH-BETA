@@ -1435,3 +1435,12 @@ clash (`mergeStyles.ts#userSuffixed`, used by both `resolveUserStyleName` and
 `generateUniqueStyleId`). `slugify` now keeps underscores, so a suffixed
 style's id matches its name (`Normal_Bold_User`). Earlier entries' `NormalUser`
 examples are history. About text, README and tests updated (134 pass).
+
+### 2026-09-30 - Version bump 0.1.1 -> 0.2.0 (still beta)
+*(branch `feature/version-0.2.0`, not yet merged)*
+
+`package.json`/`package-lock.json` `0.2.0`; footer `v.0.2.0-beta` (was
+`v.0.1.1-beta`). Minor bump because the saved-file behaviour changed:
+numbering now follows the target style, same-named styles are adopted, and
+clashing names get `_User` (see the three entries above). README and the
+About text carry no version string, so they needed no change.
