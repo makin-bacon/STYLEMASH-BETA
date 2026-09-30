@@ -14,7 +14,13 @@ import {
 } from '../lib/ooxml/bulkMergeMatchedStyles'
 import { buildContentMergedDocx, type ContentMergeOptions } from '../lib/ooxml/contentMerge'
 import { addDefaultStyles, DEFAULT_STYLES } from '../lib/ooxml/defaultStyles'
-import { mergeParagraphStyle, mergeStyles, removeStyleById } from '../lib/ooxml/mergeStyles'
+import {
+  findSameNamedStyleId,
+  mergeParagraphStyle,
+  mergeStyles,
+  removeStyleById,
+  resolveUserStyleName,
+} from '../lib/ooxml/mergeStyles'
 import { parseDocx } from '../lib/ooxml/parseDocx'
 import {
   materializeReferenceDocStyles,
@@ -516,7 +522,7 @@ export function useDocxWorkspace() {
   const confirmMerge = useCallback(
     (
       targetProps: FormattingSignature,
-      name: string,
+      requestedName: string,
       kind: UserStyleKind,
       listFormat: ListFormat,
       reuseExistingStyleId?: string,
@@ -528,6 +534,11 @@ export function useDocxWorkspace() {
       // mergeStyles() just creates/redefines the style definition itself.
       const sourceRunRefs = collectRunRefsForVariantIds(current.styleReport, current.selectedVariantIds)
       const undoSnapshot = snapshotForUndo(current.parsedDocx, current.userStyles)
+      // The name the style really gets - "NormalUser" if the document
+      // already has a different-type "Normal" (see resolveUserStyleName).
+      const styleName = resolveUserStyleName(current.parsedDocx.stylesXml, requestedName, kind)
+      const adopted =
+        !reuseExistingStyleId && findSameNamedStyleId(current.parsedDocx.stylesXml, styleName, kind) !== null
 
       try {
         const styleId =
@@ -536,27 +547,38 @@ export function useDocxWorkspace() {
                 current.parsedDocx,
                 sourceRunRefs,
                 targetProps,
-                name,
+                styleName,
                 listFormat,
                 reuseExistingStyleId,
               )
-            : mergeStyles(current.parsedDocx, sourceRunRefs, targetProps, name, reuseExistingStyleId)
+            : mergeStyles(current.parsedDocx, sourceRunRefs, targetProps, styleName, reuseExistingStyleId)
 
         const existingIndex = current.userStyles.findIndex((r) => r.styleId === styleId)
         const effectiveListFormat = kind === 'paragraph' ? listFormat : 'none'
         const record: UserStyleRecord = {
           styleId,
-          name,
+          name: styleName,
           targetSignature: targetProps,
           kind,
           listFormat: effectiveListFormat,
-          // Manually-created lists are always single-level (createListNumId
-          // only ever creates one), so this is just the ilvl-0 marker - the
-          // richer multilevel preview (e.g. "1.1.") is exclusive to styles
-          // materialized from Document B (see referenceDocStyles.ts).
+          // Redefining a style that keeps its list keeps its list's marker
+          // (mergeParagraphStyle leaves e.g. heading 2 on its shared "1.1"
+          // list). A new list is always single-level (createListNumId), so
+          // it gets the plain ilvl-0 marker.
           listPreviewText:
-            effectiveListFormat === 'bullet' ? '•' : effectiveListFormat === 'decimal' ? '1.' : undefined,
+            existingIndex !== -1 &&
+            current.userStyles[existingIndex].kind === kind &&
+            current.userStyles[existingIndex].listFormat === effectiveListFormat
+              ? current.userStyles[existingIndex].listPreviewText
+              : effectiveListFormat === 'bullet'
+                ? '•'
+                : effectiveListFormat === 'decimal'
+                  ? '1.'
+                  : undefined,
           createdAt: existingIndex === -1 ? Date.now() : current.userStyles[existingIndex].createdAt,
+          ...((existingIndex === -1 ? adopted : current.userStyles[existingIndex].adoptedFromDocument)
+            ? { adoptedFromDocument: true as const }
+            : {}),
         }
         const userStyles =
           existingIndex === -1
@@ -791,7 +813,9 @@ export function useDocxWorkspace() {
     if (!current.parsedDocx || current.userStyles.length === 0) return
     const undoSnapshot = snapshotForUndo(current.parsedDocx, current.userStyles)
     for (const record of current.userStyles) {
-      removeStyleById(current.parsedDocx.stylesXml, record.styleId)
+      // A style adopted from the document (same name as one it already had)
+      // is the document's own definition - never delete it.
+      if (!record.adoptedFromDocument) removeStyleById(current.parsedDocx.stylesXml, record.styleId)
     }
     dispatch({
       type: 'USER_STYLES_CLEARED',

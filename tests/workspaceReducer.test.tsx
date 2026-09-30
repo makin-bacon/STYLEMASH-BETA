@@ -31,10 +31,10 @@ const TARGET: FormattingSignature = {
   strike: false,
 }
 
-async function makeDocxFile(): Promise<File> {
+async function makeDocxFile(stylesXml = STYLES_XML): Promise<File> {
   const zip = new JSZip()
   zip.file('word/document.xml', DOCUMENT_XML)
-  zip.file('word/styles.xml', STYLES_XML)
+  zip.file('word/styles.xml', stylesXml)
   return new File([await zip.generateAsync({ type: 'blob' })], 'test.docx')
 }
 
@@ -45,7 +45,7 @@ async function makeDocxFile(): Promise<File> {
  * here goes through a mutating OOXML call, so a regression that moves one
  * of those calls back into the reducer shows up as duplicated work in the
  * assertions below rather than as a silent, save-time-only corruption. */
-async function mountWorkspace() {
+async function mountWorkspace(stylesXml?: string) {
   let api: ReturnType<typeof useDocxWorkspace> | null = null
   function Probe() {
     api = useDocxWorkspace()
@@ -62,7 +62,7 @@ async function mountWorkspace() {
     )
   })
 
-  const file = await makeDocxFile()
+  const file = await makeDocxFile(stylesXml)
   await act(async () => {
     await api!.actions.loadFile(file)
   })
@@ -150,6 +150,40 @@ describe('useDocxWorkspace under StrictMode', () => {
     act(() => w.api.actions.addDefaultStyles())
 
     expect(w.styleIds()).toHaveLength(DEFAULT_STYLES.length)
+    w.cleanup()
+  })
+
+  it('"+ Defaults" takes over a same-named style the document already has, and "Clear list" never deletes it', async () => {
+    const w = await mountWorkspace(`<?xml version="1.0"?><w:styles ${W}>
+      <w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/></w:style>
+    </w:styles>`)
+    act(() => w.api.actions.addDefaultStyles())
+
+    // One "heading 3", not the document's plus a lookalike Word would fold together.
+    expect(w.styleIds()).toHaveLength(DEFAULT_STYLES.length)
+    const h3 = w.api.state.userStyles.find((r) => r.name === 'heading 3')!
+    expect(h3).toMatchObject({ styleId: 'Heading3', adoptedFromDocument: true })
+
+    act(() => w.api.actions.clearUserStyles())
+    expect(w.styleIds()).toEqual(['Heading3'])
+    w.cleanup()
+  })
+
+  it('"+ Defaults" names the bundled character "Normal" NormalUser next to the document\'s paragraph Normal, once', async () => {
+    const w = await mountWorkspace(`<?xml version="1.0"?><w:styles ${W}>
+      <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
+    </w:styles>`)
+    act(() => w.api.actions.addDefaultStyles())
+    act(() => w.api.actions.addDefaultStyles())
+
+    const normal = w.api.state.userStyles.filter((r) => r.name.startsWith('Normal'))
+    expect(normal.map((r) => [r.name, r.styleId])).toEqual([
+      ['NormalUser', 'NormalUser'],
+      ['Normal Bold', 'NormalBold'],
+    ])
+    expect(normal[0].adoptedFromDocument).toBeUndefined()
+    // The document's own Normal plus one of each default - nothing doubled.
+    expect(w.styleIds()).toHaveLength(DEFAULT_STYLES.length + 1)
     w.cleanup()
   })
 

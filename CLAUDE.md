@@ -1342,3 +1342,85 @@ own is in the panel's "bottom row". README steps 7/8/11 and `about-content.md`
 **New standing rule (also saved to assistant memory): every UI change must update
 the docs and the walkthrough** - see the new "Standing rule" section near the top
 of this file for the checklist.
+
+### 2026-09-30 - Numbering in the saved file now matches New Styles; same-named styles are adopted
+*(branch `feature/no-numbering-headings`, not yet merged)*
+
+Reported: merging into "Heading 2 No Numbering" left numbers in the saved file.
+Tested against a real brochure (numbering from Word's button) and
+`public/CLEAN-STYLES.docx` (numbering from styles), both by our own resolver
+and by **opening the saved files in Microsoft Word and exporting to PDF**.
+
+- **Root cause:** "Document title" and "Heading 1-4 No Numbering" were
+  *character* styles in `DEFAULT_STYLES`. A character style can't touch
+  paragraph numbering, so a numbered paragraph kept its direct `w:numPr`
+  (numbering button) or its numbered `w:pStyle`. They are now `kind:
+  'paragraph'`, `listFormat: 'none'`.
+- **`listFormat: 'none'` paragraph styles write an explicit `<w:numId
+  w:val="0"/>`** (`mergeStyles.ts#chooseStyleNumPr`/`setStyleNumPr`), the way
+  CLEAN-STYLES.docx builds its own No Numbering styles, and the merge still
+  drops the paragraph's direct numPr - so numbering is removed however it got
+  there. (Word drops the redundant numId=0 on re-save; harmless.)
+- **Numbered headings share one multilevel list** (`createHeadingListNumId`,
+  `DefaultStyleDefinition.headingLevel`), so heading 1-4 number 1 / 1.1 /
+  1.1.1 / 1.1.1.1 as previewed. Before, each got its own single-level "1."
+  list.
+- **Re-merging keeps a style's list** instead of minting a new
+  abstractNum/num every time (which also knocked headings off the shared
+  list). The Edit/Merge dialog keeps a record's `listPreviewText` when its
+  list format is unchanged.
+- **Document B ("Upload your own")**: a paragraph style with any numPr
+  (including numId=0 "No Numbering") stays paragraph-kind, and its real list
+  definition is copied across once per B list (`copyListDefinition`, drops
+  pStyle/styleLink/nsid/picture-bullet references), so "1.1" survives.
+- **Same-named styles are adopted, not duplicated** (user decision). Word
+  folds same-name, same-type styles together on open (verified: our
+  `heading3` merged into the document's `Heading3`, so an *untouched* Heading
+  3 paragraph came out "1.1.1" in Word while StyleMash's preview showed it
+  unnumbered). `findSameNamedStyleId` (case-insensitive name + same type) now
+  makes mergeStyles/mergeParagraphStyle redefine the document's own style.
+  Records that adopt one carry `adoptedFromDocument`; **"Clear list" and
+  Remove Document B never delete those definitions**. Record matching by
+  name is case-insensitive too, and `generateUniqueStyleId` avoids ids that
+  differ only by case. (A *different-type* same-name clash - our character
+  "Normal"/"caption" vs the document's paragraph ones - is left alone: Word
+  renames ours to "Normal1"/"Caption1".)
+- **Preview counts skipped parent levels like Word:** a heading 3 before any
+  heading 1 shows 1.1.1 and the next heading 1 is 2 (`buildParagraphMarkers`).
+  Checked against Word's PDF: 1.1.1, 2, 3, 3.1, 4, 4.1.1 in both.
+- **Not changed (flagged):** Word's numbering button sometimes leaves a
+  direct `w:ind` on the first/last list item; that indent remains after
+  numbering is stripped (visible in Word). Literal numbers typed into text
+  ("01 Discovery") are text, not numbering, and stay.
+- **Docs:** the About text gets two new sections ("Numbering: headings and
+  lists", "When your document already has a style with the same name") plus a
+  Clear list note. README step 4 explains numbering and adoption, step 5's stale
+  category names are fixed, and step 8 gets a Clear list note. The walkthrough
+  copy names neither numbering nor tags, so it's unchanged. UI change: those
+  five defaults now show the "Paragraph style" tag.
+- Tests 123 -> 132: `tests/numberingOutcome.test.ts` (saves, re-opens and
+  checks every heading/list default's markers against its preview, both
+  numbering sources, shared outline, Word-style parent counting, list reuse,
+  Document B cases); adoption tests in `mergeStyles`/`referenceDocStyles`/
+  `workspaceReducer` (Clear list keeps adopted). Build + lint clean (known
+  warning only). **Not verified in Chrome** - the extension was disconnected.
+
+#### Follow-up: clashing names get a "User" suffix, not a number
+*(same branch, `feature/no-numbering-headings`)*
+
+Per request: when a StyleMash style shares its name with a *different-type*
+style in the document (the bundled character "Normal"/"caption" vs Word's
+paragraph ones), Word used to rename ours `Normal1`/`Caption1` on open.
+`mergeStyles.ts#resolveUserStyleName` now names it **`NormalUser`** (then
+`NormalUser2`, ...) up front - in the file *and* in the New Styles panel, so
+both show the same name - and `generateUniqueStyleId` suffixes colliding ids
+the same way (`User`, `User2`, ... in place of `1`, `2`). A same-type clash
+is still adopted, not renamed. Resolution is idempotent, so re-clicking
+"+ Defaults" finds and redefines the existing `NormalUser` rather than making
+`NormalUser2`. Multi-word names get no space (`Normal BoldUser`, as seen when
+CLEAN-STYLES.docx itself is loaded, since it has paragraph "Normal Bold"/
+"CRICOS/TEQSA"). Verified in Word: a re-saved file keeps `NormalUser`,
+`captionUser`, `Normal BoldUser`, `CRICOS/TEQSAUser` as-is. About text +
+README note the suffix. Tests 132 -> 134 (`mergeStyles`, `workspaceReducer`).
+No other code adds number suffixes to style names; `serializeDocx` numbers
+relationship ids (`rId…`), which aren't style names.
