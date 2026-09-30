@@ -1424,3 +1424,14 @@ CLEAN-STYLES.docx itself is loaded, since it has paragraph "Normal Bold"/
 README note the suffix. Tests 132 -> 134 (`mergeStyles`, `workspaceReducer`).
 No other code adds number suffixes to style names; `serializeDocx` numbers
 relationship ids (`rId…`), which aren't style names.
+
+### 2026-09-30 - Clash suffix is now "_User" with underscores for spaces
+*(branch `feature/user-suffix-underscore`, not yet merged)*
+
+Per request, the suffix from the previous entry changed from `User` to
+`_User`, and spaces in the name become underscores: `Normal_User`,
+`caption_User`, `Normal_Bold_User`, then `Normal_User_2`, ... on a further
+clash (`mergeStyles.ts#userSuffixed`, used by both `resolveUserStyleName` and
+`generateUniqueStyleId`). `slugify` now keeps underscores, so a suffixed
+style's id matches its name (`Normal_Bold_User`). Earlier entries' `NormalUser`
+examples are history. About text, README and tests updated (134 pass).

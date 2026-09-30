@@ -534,7 +534,7 @@ export function useDocxWorkspace() {
       // mergeStyles() just creates/redefines the style definition itself.
       const sourceRunRefs = collectRunRefsForVariantIds(current.styleReport, current.selectedVariantIds)
       const undoSnapshot = snapshotForUndo(current.parsedDocx, current.userStyles)
-      // The name the style really gets - "NormalUser" if the document
+      // The name the style really gets - "Normal_User" if the document
       // already has a different-type "Normal" (see resolveUserStyleName).
       const styleName = resolveUserStyleName(current.parsedDocx.stylesXml, requestedName, kind)
       const adopted =

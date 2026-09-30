@@ -132,7 +132,7 @@ describe('mergeStyles', () => {
     expect(styleEls[0].getElementsByTagNameNS(NS.w, 'b')).toHaveLength(1)
   })
 
-  it('names a style "…User" when the document has a different-type style of that name (not Word\'s "Normal1")', () => {
+  it('names a style "…_User" when the document has a different-type style of that name (not Word\'s "Normal1")', () => {
     const parsedDocx = makeParsedDocx({
       documentXml: `<w:document ${W}><w:body/></w:document>`,
       stylesXml: `<w:styles ${W}>
@@ -148,23 +148,23 @@ describe('mergeStyles', () => {
 
     // A character style can't take over a paragraph style of the same name.
     const normalId = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Normal')
-    expect([normalId, nameOf(normalId)]).toEqual(['NormalUser', 'NormalUser'])
+    expect([normalId, nameOf(normalId)]).toEqual(['Normal_User', 'Normal_User'])
     const headingId = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'heading 1')
-    expect([headingId, nameOf(headingId)]).toEqual(['heading1User', 'heading 1User'])
+    expect([headingId, nameOf(headingId)]).toEqual(['heading_1_User', 'heading_1_User'])
 
-    // Asking again finds and redefines our own "NormalUser", no "NormalUser2".
-    expect(mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Normal')).toBe('NormalUser')
+    // Asking again finds and redefines our own "Normal_User", no "Normal_User_2".
+    expect(mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Normal')).toBe('Normal_User')
     expect(parsedDocx.stylesXml.getElementsByTagNameNS(NS.w, 'style')).toHaveLength(4)
   })
 
-  it('suffixes a colliding styleId with "User", then "User2" (case-insensitively)', () => {
+  it('suffixes a colliding styleId with "_User", then "_User_2" (case-insensitively)', () => {
     const parsedDocx = makeParsedDocx({
       documentXml: `<w:document ${W}><w:body/></w:document>`,
       stylesXml: `<w:styles ${W}>
         <w:style w:type="table" w:styleId="Callout"><w:name w:val="Callout table"/></w:style>
-        <w:style w:type="table" w:styleId="calloutuser"><w:name w:val="Callout table 2"/></w:style>
+        <w:style w:type="table" w:styleId="callout_user"><w:name w:val="Callout table 2"/></w:style>
       </w:styles>`,
     })
-    expect(mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Callout')).toBe('CalloutUser2')
+    expect(mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Callout')).toBe('Callout_User_2')
   })
 })
