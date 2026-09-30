@@ -444,7 +444,7 @@ export function addDefaultStyles(
   for (const def of DEFAULT_STYLES) {
     if (!enabledNames.has(def.name)) continue
 
-    // "Normal" becomes "NormalUser" next to the document's paragraph
+    // "Normal" becomes "Normal_User" next to the document's paragraph
     // "Normal" - see resolveUserStyleName.
     const name = resolveUserStyleName(targetDocx.stylesXml, def.name, def.kind)
     const collision = existingByName.get(name.toLowerCase())
