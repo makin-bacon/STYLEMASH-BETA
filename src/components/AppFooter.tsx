@@ -15,7 +15,7 @@ export function AppFooter({ isDark, onToggleTheme }: AppFooterProps) {
       <span aria-hidden="true" />
       <p className="text-center">
         Everything happens locally in your browser - files are never uploaded anywhere.
-        <span className="text-chrome-muted"> · v.0.1.1-beta</span>
+        <span className="text-chrome-muted"> · v.0.2.0-beta</span>
       </p>
       <div className="justify-self-end">
         <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
