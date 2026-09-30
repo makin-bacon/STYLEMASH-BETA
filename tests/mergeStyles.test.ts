@@ -118,13 +118,30 @@ describe('mergeStyles', () => {
     expect(report[0].signature.bold).toBe(true)
   })
 
-  it('generates unique styleIds when names collide', () => {
+  it('redefines a same-named style of the same type instead of adding a lookalike (case-insensitive)', () => {
     const documentXml = `<w:document ${W}><w:body><w:p><w:r><w:t>A</w:t></w:r></w:p></w:body></w:document>`
     const parsedDocx = makeParsedDocx({ documentXml })
 
     const id1 = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Custom Style')
-    const id2 = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'Custom Style')
+    const id2 = mergeStyles(parsedDocx, [], { ...NEUTRAL_SIGNATURE, bold: true }, 'custom style')
 
-    expect(id1).not.toBe(id2)
+    // Word folds same-name styles together on open, so two would silently become one anyway.
+    expect(id2).toBe(id1)
+    const styleEls = parsedDocx.stylesXml.getElementsByTagNameNS(NS.w, 'style')
+    expect(styleEls).toHaveLength(1)
+    expect(styleEls[0].getElementsByTagNameNS(NS.w, 'b')).toHaveLength(1)
+  })
+
+  it('generates a unique styleId (case-insensitively) when only the id would collide', () => {
+    const parsedDocx = makeParsedDocx({
+      documentXml: `<w:document ${W}><w:body/></w:document>`,
+      stylesXml: `<w:styles ${W}>
+        <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/></w:style>
+      </w:styles>`,
+    })
+    // A character style can't take over the paragraph style, and "heading1"
+    // must not sit next to "Heading1".
+    const id = mergeStyles(parsedDocx, [], NEUTRAL_SIGNATURE, 'heading 1')
+    expect(id.toLowerCase()).not.toBe('heading1')
   })
 })

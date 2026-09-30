@@ -42,6 +42,17 @@ There are two ways to merge selected entries into a style:
 
 Either way, every selected entry's text is re-styled to match the target style, which now covers that formatting wherever it appears in the document.
 
+## Numbering: headings and lists
+
+Merging also sets a paragraph's numbering to match the style you merge into, exactly as its New Styles entry shows it. It does not matter how the text got its numbers in the first place - from a numbered style, or from Word's numbering button.
+
+- Styles tagged "Numbered list" or "Bulleted list" add their numbers or bullets. The bundled headings share one outline, so heading 1, heading 2 and heading 3 number as 1, 1.1 and 1.1.1.
+- Styles tagged "Paragraph style" - such as "Document title" and the "No Numbering" headings - remove any numbering from the text merged into them.
+
+## When your document already has a style with the same name
+
+Word treats two styles with the same name as one. So when a New Styles entry has the same name as a style your document already uses - "heading 1" from "+ Defaults", for example - StyleMash redefines the document's own style rather than adding a second one. Everything already using that style changes too, including text you have not merged, and the Document Preview and Current styles show that straight away. "Clear list" and "Remove Document B" never delete a style your document had to begin with.
+
 ## Choosing which bundled defaults you get
 
 Not every default style is useful for every document. Click "Customise your own style file" in the top header to open a checklist of every bundled default, grouped into "Body text styles", "Heading Styles" and "List styles". Untick anything you do not want, and the next "+ Defaults" click only adds what is still ticked. The same panel has a link to download the underlying reference Word file, if you would rather open it in Word and build your own variant.
@@ -52,7 +63,7 @@ If you already have a clean, approved Word document with the styles you want eve
 
 ## Undo, clearing, and starting over
 
-"Undo", next to "Mash it" at the bottom of New Styles, reverts the most recent merge or "Clear list", one step at a time. "Clear list" (the very bottom row, beside "Upload your own") wipes every New Styles entry you have created this session. "Mash a different file" takes you back to the upload screen to start over with a new document.
+"Undo", next to "Mash it" at the bottom of New Styles, reverts the most recent merge or "Clear list", one step at a time. "Clear list" (the very bottom row, beside "Upload your own") wipes every New Styles entry you have created this session (a style your document already had keeps its definition). "Mash a different file" takes you back to the upload screen to start over with a new document.
 
 ## Saving your result
 

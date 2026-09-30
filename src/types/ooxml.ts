@@ -133,6 +133,12 @@ export interface UserStyleRecord {
    * is detached; one with occurrences > 0 just loses the flag and becomes
    * an ordinary user-owned style. */
   fromReferenceDoc?: true
+  /** Set when this record took over a style the document already had under
+   * the same name (e.g. + Defaults' "heading 1" redefining the document's
+   * own Heading1 - see mergeStyles.ts#findSameNamedStyleId). The definition
+   * belongs to the document, so "Clear list" and removing Document B drop
+   * the record but never delete the <w:style> itself. */
+  adoptedFromDocument?: true
 }
 
 /** A resolved entry from styles.xml - paragraph or character styles only;

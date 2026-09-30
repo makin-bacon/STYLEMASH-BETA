@@ -1,7 +1,7 @@
 import type { FormattingSignature, ListFormat, ParsedDocx, RunRef } from '../../types/ooxml'
 import { NS } from './constants'
 import { createWEl, insertRPrChildInOrder, removeWChild, setWAttr, wAttr, wChild, wChildren } from './domUtils'
-import { createListNumId } from './numbering'
+import { createListNumId, readStyleElementNumPr, resolveListLevelFormat, type StyleNumPr } from './numbering'
 import { stripTrackedProps, writeSignatureIntoRPr } from './rPrHelpers'
 
 function collectExistingStyleIds(stylesXml: XMLDocument): Set<string> {
@@ -15,6 +15,30 @@ function collectExistingStyleIds(stylesXml: XMLDocument): Set<string> {
   return ids
 }
 
+/** The styleId of a style this document already has with the same name
+ * (case-insensitive, as Word compares built-in names like "heading 1") and
+ * the same type - or null. Word folds same-name, same-type styles into one
+ * when it opens a file, so a new lookalike style would silently redefine the
+ * document's own (e.g. every untouched Heading 3 paragraph picking up the
+ * new look and numbering) while StyleMash's preview showed them unchanged.
+ * Creating a style therefore redefines this one instead - see mergeStyles()
+ * and mergeParagraphStyle(). */
+export function findSameNamedStyleId(
+  stylesXml: XMLDocument,
+  name: string,
+  type: 'paragraph' | 'character',
+): string | null {
+  const stylesRoot = stylesXml.getElementsByTagNameNS(NS.w, 'styles')[0]
+  if (!stylesRoot) return null
+  const wanted = name.trim().toLowerCase()
+  for (const styleEl of wChildren(stylesRoot, 'style')) {
+    if (wAttr(styleEl, 'type') !== type) continue
+    const styleName = wAttr(wChild(styleEl, 'name'), 'val')
+    if (styleName?.trim().toLowerCase() === wanted) return wAttr(styleEl, 'styleId')
+  }
+  return null
+}
+
 function slugify(name: string): string {
   const cleaned = name.replace(/[^a-zA-Z0-9]/g, '')
   const base = cleaned.length > 0 ? cleaned : 'Style'
@@ -25,11 +49,13 @@ function slugify(name: string): string {
  * @w:styleId in this document, by slugifying `name` and appending -1, -2...
  * on collision. */
 export function generateUniqueStyleId(stylesXml: XMLDocument, name: string): string {
-  const existing = collectExistingStyleIds(stylesXml)
+  // Compared case-insensitively: "heading1" next to an existing "Heading1"
+  // is asking for trouble in consumers that fold case.
+  const existing = new Set([...collectExistingStyleIds(stylesXml)].map((id) => id.toLowerCase()))
   const base = slugify(name)
-  if (!existing.has(base)) return base
+  if (!existing.has(base.toLowerCase())) return base
   let n = 1
-  while (existing.has(`${base}${n}`)) n++
+  while (existing.has(`${base}${n}`.toLowerCase())) n++
   return `${base}${n}`
 }
 
@@ -147,7 +173,9 @@ function applyStyleToRun(runEl: Element, styleId: string): void {
  *
  * Pass `reuseExistingStyleId` to redefine/extend an already-created style
  * (e.g. editing an existing UserStyleRecord, or targeting an existing style
- * from the merge dialog) instead of creating a new one.
+ * from the merge dialog) instead of creating a new one. Without it, a
+ * style the document already has under the same name is redefined rather
+ * than duplicated (see findSameNamedStyleId).
  *
  * Mutates parsedDocx.documentXml/stylesXml in place. Caller is expected to
  * recompute buildStyleReport() afterward - the merged runs will naturally
@@ -167,13 +195,14 @@ export function mergeStyles(
   }
 
   let styleId: string
+  const reuseId = reuseExistingStyleId ?? findSameNamedStyleId(stylesXml, name, 'character') ?? undefined
 
-  if (reuseExistingStyleId) {
-    const existingStyleEl = findStyleElementById(stylesRoot, reuseExistingStyleId)
+  if (reuseId) {
+    const existingStyleEl = findStyleElementById(stylesRoot, reuseId)
     if (!existingStyleEl) {
-      throw new Error(`Cannot reuse style "${reuseExistingStyleId}" - it no longer exists.`)
+      throw new Error(`Cannot reuse style "${reuseId}" - it no longer exists.`)
     }
-    styleId = reuseExistingStyleId
+    styleId = reuseId
     updateStyleNameAndRPr(existingStyleEl, name, targetProps)
   } else {
     styleId = generateUniqueStyleId(stylesXml, name)
@@ -192,15 +221,15 @@ export function mergeStyles(
 }
 
 /** Builds a new paragraph-type <w:style>. CT_Style's child order for what we
- * write is name, basedOn, pPr, rPr - pPr (carrying the list's w:numPr, if
- * any) comes before rPr, unlike buildStyleElement's character-style shape
- * which has no pPr at all. */
+ * write is name, basedOn, pPr, rPr - pPr (carrying the style's w:numPr)
+ * comes before rPr, unlike buildStyleElement's character-style shape which
+ * has no pPr at all. */
 function buildParagraphStyleElement(
   doc: XMLDocument,
   styleId: string,
   name: string,
   targetProps: FormattingSignature,
-  numId: string | null,
+  numPr: StyleNumPr,
   hasNormal: boolean,
 ): Element {
   const styleEl = createWEl(doc, 'style')
@@ -217,32 +246,57 @@ function buildParagraphStyleElement(
     styleEl.appendChild(basedOnEl)
   }
 
-  if (numId !== null) {
-    styleEl.appendChild(buildPPrWithNumId(doc, numId))
-  }
-
   const rPr = createWEl(doc, 'rPr')
   writeSignatureIntoRPr(rPr, targetProps)
   styleEl.appendChild(rPr)
 
+  setStyleNumPr(styleEl, numPr)
+
   return styleEl
 }
 
-function buildPPrWithNumId(doc: XMLDocument, numId: string): Element {
-  const pPr = createWEl(doc, 'pPr')
-  const numPr = createWEl(doc, 'numPr')
+/** CT_PPrBase children that must come *before* w:numPr. */
+const PPR_CHILDREN_BEFORE_NUMPR = new Set(['pStyle', 'keepNext', 'keepLines', 'pageBreakBefore', 'framePr', 'widowControl'])
+
+/** Writes a style's own <w:pPr>/<w:numPr> - replacing whatever numPr it had.
+ * A real list writes ilvl + numId; 'off' writes numId="0", OOXML's explicit
+ * "no numbering", so the style's paragraphs stay unnumbered even if its
+ * basedOn chain carries a list. Creates pPr (right before rPr, per CT_Style)
+ * if needed, and slots numPr into CT_PPrBase order within it. */
+function setStyleNumPr(styleEl: Element, numPr: StyleNumPr): void {
+  const doc = styleEl.ownerDocument
+  let pPr = wChild(styleEl, 'pPr')
+  if (!pPr) {
+    pPr = createWEl(doc, 'pPr')
+    styleEl.insertBefore(pPr, wChild(styleEl, 'rPr'))
+  }
+  removeWChild(pPr, 'numPr')
+
+  const numPrEl = createWEl(doc, 'numPr')
+  if (numPr !== 'off') {
+    const ilvlEl = createWEl(doc, 'ilvl')
+    setWAttr(ilvlEl, 'val', String(numPr.ilvl))
+    numPrEl.appendChild(ilvlEl)
+  }
   const numIdEl = createWEl(doc, 'numId')
-  setWAttr(numIdEl, 'val', numId)
-  numPr.appendChild(numIdEl)
-  pPr.appendChild(numPr)
-  return pPr
+  setWAttr(numIdEl, 'val', numPr === 'off' ? '0' : numPr.numId)
+  numPrEl.appendChild(numIdEl)
+
+  let before: Element | null = null
+  for (let i = 0; i < pPr.children.length; i++) {
+    if (!PPR_CHILDREN_BEFORE_NUMPR.has(pPr.children[i].localName)) {
+      before = pPr.children[i]
+      break
+    }
+  }
+  pPr.insertBefore(numPrEl, before)
 }
 
 function updateParagraphStyleDefinition(
   styleEl: Element,
   name: string,
   targetProps: FormattingSignature,
-  numId: string | null,
+  numPr: StyleNumPr,
 ): void {
   const doc = styleEl.ownerDocument
 
@@ -253,41 +307,50 @@ function updateParagraphStyleDefinition(
   }
   setWAttr(nameEl, 'val', name)
 
-  let pPr = wChild(styleEl, 'pPr')
-  if (numId !== null) {
-    if (!pPr) {
-      pPr = buildPPrWithNumId(doc, numId)
-      // pPr sits right before rPr in every style this app writes (see
-      // buildParagraphStyleElement) - inserting before rPr (or at the end,
-      // via insertBefore(_, null), if rPr is somehow absent) keeps that true
-      // for a style this function is upgrading from list-less to list-having.
-      styleEl.insertBefore(pPr, wChild(styleEl, 'rPr'))
-    } else {
-      let numPr = wChild(pPr, 'numPr')
-      if (!numPr) {
-        numPr = createWEl(doc, 'numPr')
-        pPr.insertBefore(numPr, pPr.firstChild)
-      }
-      let numIdEl = wChild(numPr, 'numId')
-      if (!numIdEl) {
-        numIdEl = createWEl(doc, 'numId')
-        numPr.appendChild(numIdEl)
-      }
-      setWAttr(numIdEl, 'val', numId)
-    }
-  } else if (pPr) {
-    // Switched from a list format back to "none" - this app's pPr only ever
-    // holds numPr, so dropping that empties it out entirely.
-    removeWChild(pPr, 'numPr')
-    if (pPr.children.length === 0) styleEl.removeChild(pPr)
-  }
-
   let rPr = wChild(styleEl, 'rPr')
   if (!rPr) {
     rPr = createWEl(doc, 'rPr')
     styleEl.appendChild(rPr)
   }
   writeSignatureIntoRPr(rPr, targetProps)
+
+  setStyleNumPr(styleEl, numPr)
+}
+
+/** Decides the numPr a paragraph style should carry for `listFormat`:
+ * - 'none' is always an explicit 'off' (numId="0") - so a "No Numbering"
+ *   style really does strip numbering from every paragraph merged into it;
+ * - an explicit `listNumPr` (a shared heading list, or a list copied from
+ *   Document B) wins next;
+ * - redefining a style that already sits on a list of the right kind keeps
+ *   that list - re-merging into "heading 2" must not knock it off the shared
+ *   multilevel heading list (or restart its numbering) by minting a new one;
+ * - otherwise a fresh single-level list is created. */
+function chooseStyleNumPr(
+  parsedDocx: ParsedDocx,
+  listFormat: ListFormat,
+  existingStyleEl: Element | null,
+  listNumPr: { numId: string; ilvl: number } | undefined,
+): StyleNumPr {
+  if (listFormat === 'none') return 'off'
+  if (listNumPr) return listNumPr
+  const current = existingStyleEl ? readStyleElementNumPr(existingStyleEl) : null
+  if (
+    current &&
+    current !== 'off' &&
+    resolveListLevelFormat(parsedDocx.numberingXml, current.numId, current.ilvl) === listFormat
+  ) {
+    return current
+  }
+  return { numId: createListNumId(parsedDocx, listFormat), ilvl: 0 }
+}
+
+/** The numPr a style element currently carries directly (no basedOn walk) -
+ * how addDefaultStyles() finds the shared heading list to keep reusing. */
+export function readStyleNumPrById(stylesXml: XMLDocument, styleId: string): StyleNumPr | null {
+  const stylesRoot = stylesXml.getElementsByTagNameNS(NS.w, 'styles')[0]
+  const styleEl = stylesRoot ? findStyleElementById(stylesRoot, styleId) : null
+  return styleEl ? readStyleElementNumPr(styleEl) : null
 }
 
 /** Points a paragraph at `styleId` via w:pStyle. Also drops any *direct*
@@ -343,6 +406,14 @@ function clearRunDirectFormatting(runEl: Element): void {
  * <w:rPr> actually determines how the text looks, matching the same
  * "merge fully subsumes formatting" guarantee mergeStyles() makes.
  *
+ * Numbering always ends up matching `listFormat`, however the source
+ * paragraph got its numbers (a numbered style, or Word's numbering button,
+ * i.e. a direct w:numPr): the paragraph's direct numPr is dropped, and a
+ * 'none' style carries an explicit numId="0" so nothing inherited can bring
+ * numbers back (see chooseStyleNumPr). `listNumPr` pins the style to a
+ * specific list level - the shared heading list, or a list copied from
+ * Document B - instead of a fresh single-level list.
+ *
  * Mutates parsedDocx.documentXml/stylesXml/numberingXml in place. Caller is
  * expected to recompute buildStyleReport() afterward.
  */
@@ -353,6 +424,7 @@ export function mergeParagraphStyle(
   name: string,
   listFormat: ListFormat,
   reuseExistingStyleId?: string,
+  listNumPr?: { numId: string; ilvl: number },
 ): string {
   const { stylesXml } = parsedDocx
   const stylesRoot = stylesXml.getElementsByTagNameNS(NS.w, 'styles')[0]
@@ -360,21 +432,22 @@ export function mergeParagraphStyle(
     throw new Error('This document\'s styles.xml is missing a <w:styles> root - cannot merge.')
   }
 
-  const numId = listFormat === 'none' ? null : createListNumId(parsedDocx, listFormat)
-
   let styleId: string
+  const reuseId = reuseExistingStyleId ?? findSameNamedStyleId(stylesXml, name, 'paragraph') ?? undefined
 
-  if (reuseExistingStyleId) {
-    const existingStyleEl = findStyleElementById(stylesRoot, reuseExistingStyleId)
+  if (reuseId) {
+    const existingStyleEl = findStyleElementById(stylesRoot, reuseId)
     if (!existingStyleEl) {
-      throw new Error(`Cannot reuse style "${reuseExistingStyleId}" - it no longer exists.`)
+      throw new Error(`Cannot reuse style "${reuseId}" - it no longer exists.`)
     }
-    styleId = reuseExistingStyleId
-    updateParagraphStyleDefinition(existingStyleEl, name, targetProps, numId)
+    styleId = reuseId
+    const numPr = chooseStyleNumPr(parsedDocx, listFormat, existingStyleEl, listNumPr)
+    updateParagraphStyleDefinition(existingStyleEl, name, targetProps, numPr)
   } else {
     styleId = generateUniqueStyleId(stylesXml, name)
     const hasNormal = collectExistingStyleIds(stylesXml).has('Normal')
-    const newStyleEl = buildParagraphStyleElement(stylesXml, styleId, name, targetProps, numId, hasNormal)
+    const numPr = chooseStyleNumPr(parsedDocx, listFormat, null, listNumPr)
+    const newStyleEl = buildParagraphStyleElement(stylesXml, styleId, name, targetProps, numPr, hasNormal)
     stylesRoot.appendChild(newStyleEl)
   }
 

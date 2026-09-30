@@ -1,5 +1,6 @@
 import type { FormattingSignature, ListFormat, ParsedDocx, UserStyleKind, UserStyleRecord } from '../../types/ooxml'
-import { mergeParagraphStyle, mergeStyles } from './mergeStyles'
+import { findSameNamedStyleId, mergeParagraphStyle, mergeStyles, readStyleNumPrById } from './mergeStyles'
+import { createHeadingListNumId } from './numbering'
 
 /** Groups DEFAULT_STYLES for display in the "Customise your own style file"
  * checklist (embedded in the New Styles panel, toggled by AppHeader's header
@@ -23,6 +24,10 @@ export interface DefaultStyleDefinition {
   kind: UserStyleKind
   listFormat: ListFormat
   listPreviewText?: string
+  /** Set on the numbered heading styles only: the level (0 = heading 1) this
+   * style occupies in the one multilevel list they all share - see
+   * createHeadingListNumId. */
+  headingLevel?: number
 }
 
 /** StyleMash's bundled starter style set - extracted from
@@ -147,7 +152,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
       underline: null,
       strike: false,
     },
-    kind: 'character',
+    kind: 'paragraph',
     listFormat: 'none',
   },
   {
@@ -165,6 +170,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
     kind: 'paragraph',
     listFormat: 'decimal',
     listPreviewText: '1',
+    headingLevel: 0,
   },
   {
     name: 'heading 2',
@@ -181,6 +187,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
     kind: 'paragraph',
     listFormat: 'decimal',
     listPreviewText: '1.1',
+    headingLevel: 1,
   },
   {
     name: 'heading 3',
@@ -197,6 +204,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
     kind: 'paragraph',
     listFormat: 'decimal',
     listPreviewText: '1.1.1',
+    headingLevel: 2,
   },
   {
     name: 'heading 4',
@@ -213,6 +221,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
     kind: 'paragraph',
     listFormat: 'decimal',
     listPreviewText: '1.1.1.1',
+    headingLevel: 3,
   },
   {
     name: 'Heading 1 No Numbering',
@@ -226,7 +235,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
       underline: null,
       strike: false,
     },
-    kind: 'character',
+    kind: 'paragraph',
     listFormat: 'none',
   },
   {
@@ -241,7 +250,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
       underline: null,
       strike: false,
     },
-    kind: 'character',
+    kind: 'paragraph',
     listFormat: 'none',
   },
   {
@@ -256,7 +265,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
       underline: null,
       strike: false,
     },
-    kind: 'character',
+    kind: 'paragraph',
     listFormat: 'none',
   },
   {
@@ -271,7 +280,7 @@ export const DEFAULT_STYLES: DefaultStyleDefinition[] = [
       underline: null,
       strike: false,
     },
-    kind: 'character',
+    kind: 'paragraph',
     listFormat: 'none',
   },
   {
@@ -404,14 +413,36 @@ export function addDefaultStyles(
   existingUserStyles: UserStyleRecord[],
   enabledNames: ReadonlySet<string> = new Set(DEFAULT_STYLES.map((d) => d.name)),
 ): UserStyleRecord[] {
-  const existingByName = new Map(existingUserStyles.map((r) => [r.name, r]))
+  // Case-insensitive, matching how same-named document styles are found
+  // (findSameNamedStyleId) - "heading 1" and "Heading 1" are one style to Word.
+  const existingByName = new Map(existingUserStyles.map((r) => [r.name.toLowerCase(), r]))
   const replacements = new Map<string, UserStyleRecord>()
   const brandNew: UserStyleRecord[] = []
+
+  // The numbered headings share one multilevel list. Re-clicking
+  // "+ Defaults" keeps using the list an earlier click created (found on any
+  // heading style already in the document) rather than minting another.
+  let headingNumId: string | undefined
+  for (const def of DEFAULT_STYLES) {
+    const collision = def.headingLevel === undefined ? undefined : existingByName.get(def.name.toLowerCase())
+    const numPr = collision ? readStyleNumPrById(targetDocx.stylesXml, collision.styleId) : null
+    if (numPr && numPr !== 'off') {
+      headingNumId = numPr.numId
+      break
+    }
+  }
 
   for (const def of DEFAULT_STYLES) {
     if (!enabledNames.has(def.name)) continue
 
-    const collision = existingByName.get(def.name)
+    const collision = existingByName.get(def.name.toLowerCase())
+    const adopted =
+      !collision && findSameNamedStyleId(targetDocx.stylesXml, def.name, def.kind) !== null
+    let listNumPr: { numId: string; ilvl: number } | undefined
+    if (def.headingLevel !== undefined) {
+      headingNumId ??= createHeadingListNumId(targetDocx)
+      listNumPr = { numId: headingNumId, ilvl: def.headingLevel }
+    }
     const newStyleId =
       def.kind === 'character'
         ? mergeStyles(targetDocx, [], def.targetSignature, def.name, collision?.styleId)
@@ -422,6 +453,7 @@ export function addDefaultStyles(
             def.name,
             def.listFormat,
             collision?.styleId,
+            listNumPr,
           )
 
     const record: UserStyleRecord = {
@@ -432,6 +464,7 @@ export function addDefaultStyles(
       listFormat: def.listFormat,
       listPreviewText: def.listPreviewText,
       createdAt: collision?.createdAt ?? Date.now(),
+      ...(adopted || collision?.adoptedFromDocument ? { adoptedFromDocument: true as const } : {}),
     }
 
     if (collision) {

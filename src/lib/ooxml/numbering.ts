@@ -271,6 +271,12 @@ export function buildParagraphMarkers(parsedDocx: ParsedDocx): Map<Element, Para
       levelCounts = []
       counts.set(numPr.numId, levelCounts)
     }
+    // Reaching a level before its parents (a heading 3 with no heading 1
+    // yet) shows the parents at their start value and - as Word does -
+    // counts them as used, so the next heading 1 is "2", not "1".
+    for (let parent = 0; parent < numPr.ilvl; parent++) {
+      levelCounts[parent] ??= levels[parent]?.start ?? 1
+    }
     levelCounts[numPr.ilvl] = (levelCounts[numPr.ilvl] ?? levelDef.start - 1) + 1
     // A paragraph at a shallower level restarts every deeper level's count,
     // so the next time e.g. "1.a" is reached it starts over from "a" again.
@@ -322,11 +328,7 @@ function nextAvailableId(root: Element, tagName: 'abstractNum' | 'num', attrName
  * read from an existing document. */
 export function createListNumId(parsedDocx: ParsedDocx, format: Exclude<ListFormat, 'none'>): string {
   const numberingXml = ensureNumberingXml(parsedDocx)
-  const root = numberingXml.getElementsByTagNameNS(NS.w, 'numbering')[0]
-
-  const abstractNumId = nextAvailableId(root, 'abstractNum', 'abstractNumId')
   const abstractEl = createWEl(numberingXml, 'abstractNum')
-  setWAttr(abstractEl, 'abstractNumId', abstractNumId)
 
   const lvlEl = createWEl(numberingXml, 'lvl')
   setWAttr(lvlEl, 'ilvl', '0')
@@ -344,9 +346,64 @@ export function createListNumId(parsedDocx: ParsedDocx, format: Exclude<ListForm
   lvlEl.appendChild(lvlJcEl)
   abstractEl.appendChild(lvlEl)
 
-  // CT_Numbering requires every abstractNum before every num - insert ahead
-  // of the first existing <w:num> (or at the end, via insertBefore(_, null),
-  // if this is the first list this document has ever had).
+  return registerAbstractNum(numberingXml, abstractEl)
+}
+
+/** A paragraph style's own list assignment, as written into its
+ * <w:pPr>/<w:numPr>: a real list level, or 'off' - an explicit numId="0",
+ * OOXML's "no numbering here, whatever the basedOn chain or a direct
+ * numbering button said" (how Word's own "Heading 2 No Numbering"-style
+ * variants are built). */
+export type StyleNumPr = { numId: string; ilvl: number } | 'off'
+
+/** Like resolveNumPrFromStyleChain, but keeps an explicit numId="0" apart
+ * from "no numPr anywhere in the chain" (null) - the difference between a
+ * style that deliberately turns numbering off and one that simply never
+ * mentions it. */
+export function resolveStyleNumPr(styleId: string, stylesMap: Map<string, StyleDef>): StyleNumPr | null {
+  let id: string | null = styleId
+  const visited = new Set<string>()
+  while (id && !visited.has(id)) {
+    visited.add(id)
+    const style = stylesMap.get(id)
+    if (!style) break
+    const fromStyle = directNumPr(style.pPrElement)
+    if (fromStyle === null) return 'off'
+    if (fromStyle !== undefined) return fromStyle
+    id = style.basedOnId
+  }
+  return null
+}
+
+/** Reads the <w:numPr> written directly on a style element's own <w:pPr>
+ * (no basedOn walk) - null when it has none. */
+export function readStyleElementNumPr(styleEl: Element): StyleNumPr | null {
+  const direct = directNumPr(wChild(styleEl, 'pPr'))
+  if (direct === undefined) return null
+  return direct ?? 'off'
+}
+
+/** The bullet/decimal kind of one level of a list in `numberingXml`, coerced
+ * the same way resolveStyleListFormat does - 'none' if it can't be resolved. */
+export function resolveListLevelFormat(
+  numberingXml: XMLDocument | null,
+  numId: string,
+  ilvl: number,
+): ListFormat {
+  const { numToAbstract, abstractLevels } = parseNumberingXml(numberingXml)
+  const abstractNumId = numToAbstract.get(numId)
+  const levelDef = abstractNumId ? abstractLevels.get(abstractNumId)?.[ilvl] : undefined
+  if (!levelDef || levelDef.numFmt === 'none') return 'none'
+  return levelDef.numFmt === 'bullet' ? 'bullet' : 'decimal'
+}
+
+/** Appends a new abstractNum (already populated with its levels) plus a
+ * <w:num> pointing at it, keeping CT_Numbering's "every abstractNum before
+ * every num" order. Returns the new numId. */
+function registerAbstractNum(numberingXml: XMLDocument, abstractEl: Element): string {
+  const root = numberingXml.getElementsByTagNameNS(NS.w, 'numbering')[0]
+  const abstractNumId = nextAvailableId(root, 'abstractNum', 'abstractNumId')
+  setWAttr(abstractEl, 'abstractNumId', abstractNumId)
   root.insertBefore(abstractEl, wChild(root, 'num'))
 
   const numId = nextAvailableId(root, 'num', 'numId')
@@ -356,6 +413,91 @@ export function createListNumId(parsedDocx: ParsedDocx, format: Exclude<ListForm
   setWAttr(abstractNumIdRefEl, 'val', abstractNumId)
   numEl.appendChild(abstractNumIdRefEl)
   root.appendChild(numEl)
-
   return numId
+}
+
+const HEADING_LIST_LEVELS = 9
+
+/** Creates the one multilevel decimal list StyleMash's bundled heading
+ * styles share - level 0 "%1", level 1 "%1.%2", ... level 8 - so heading 1..4
+ * number as 1 / 1.1 / 1.1.1 / 1.1.1.1 in the saved file, exactly the markers
+ * the New Styles panel previews (and the numbering CLEAN-STYLES.docx itself
+ * uses). A single shared list is what makes "1.1" continue from the
+ * preceding heading 1; one independent list per style (createListNumId)
+ * would restart every heading level at "1." instead. */
+export function createHeadingListNumId(parsedDocx: ParsedDocx): string {
+  const numberingXml = ensureNumberingXml(parsedDocx)
+  const abstractEl = createWEl(numberingXml, 'abstractNum')
+  const multiLevelTypeEl = createWEl(numberingXml, 'multiLevelType')
+  setWAttr(multiLevelTypeEl, 'val', 'multilevel')
+  abstractEl.appendChild(multiLevelTypeEl)
+
+  for (let ilvl = 0; ilvl < HEADING_LIST_LEVELS; ilvl++) {
+    const lvlEl = createWEl(numberingXml, 'lvl')
+    setWAttr(lvlEl, 'ilvl', String(ilvl))
+    const startEl = createWEl(numberingXml, 'start')
+    setWAttr(startEl, 'val', '1')
+    lvlEl.appendChild(startEl)
+    const numFmtEl = createWEl(numberingXml, 'numFmt')
+    setWAttr(numFmtEl, 'val', 'decimal')
+    lvlEl.appendChild(numFmtEl)
+    const lvlTextEl = createWEl(numberingXml, 'lvlText')
+    setWAttr(
+      lvlTextEl,
+      'val',
+      Array.from({ length: ilvl + 1 }, (_, i) => `%${i + 1}`).join('.'),
+    )
+    lvlEl.appendChild(lvlTextEl)
+    const lvlJcEl = createWEl(numberingXml, 'lvlJc')
+    setWAttr(lvlJcEl, 'val', 'left')
+    lvlEl.appendChild(lvlJcEl)
+    abstractEl.appendChild(lvlEl)
+  }
+
+  return registerAbstractNum(numberingXml, abstractEl)
+}
+
+/** Copies the list definition behind `sourceNumId` (in another document's
+ * numbering part - Document B's) into `targetDocx` as a brand-new
+ * abstractNum/num pair and returns the new numId, so a Document B style
+ * keeps its real multilevel numbering (e.g. "1.1" for a heading 2) instead
+ * of being flattened into a single-level "1." list. References that would
+ * dangle in the target document are dropped: w:pStyle links (Document B's
+ * style ids), w:styleLink/w:numStyleLink, picture bullets, and the
+ * nsid/tmpl identity fields (Word regenerates those). Returns null when the
+ * source list can't be resolved or has no levels of its own (e.g. it
+ * delegates to a numbering style via numStyleLink) - callers then fall back
+ * to createListNumId(). */
+export function copyListDefinition(
+  targetDocx: ParsedDocx,
+  sourceNumberingXml: XMLDocument | null,
+  sourceNumId: string,
+): string | null {
+  const sourceRoot = sourceNumberingXml?.getElementsByTagNameNS(NS.w, 'numbering')[0]
+  if (!sourceRoot) return null
+  const sourceNumEl = wChildren(sourceRoot, 'num').find((el) => wAttr(el, 'numId') === sourceNumId)
+  const sourceAbstractId = wAttr(wChild(sourceNumEl ?? null, 'abstractNumId'), 'val')
+  const sourceAbstractEl = wChildren(sourceRoot, 'abstractNum').find(
+    (el) => wAttr(el, 'abstractNumId') === sourceAbstractId,
+  )
+  if (!sourceAbstractEl || wChildren(sourceAbstractEl, 'lvl').length === 0) return null
+
+  const numberingXml = ensureNumberingXml(targetDocx)
+  const abstractEl = numberingXml.importNode(sourceAbstractEl, true) as Element
+  for (const attr of Array.from(abstractEl.attributes)) {
+    if (attr.namespaceURI !== NS.w) abstractEl.removeAttributeNode(attr)
+  }
+  for (const tag of ['nsid', 'tmpl', 'styleLink', 'numStyleLink']) {
+    for (const el of wChildren(abstractEl, tag)) abstractEl.removeChild(el)
+  }
+  for (const lvlEl of wChildren(abstractEl, 'lvl')) {
+    for (const attr of Array.from(lvlEl.attributes)) {
+      if (attr.namespaceURI !== NS.w) lvlEl.removeAttributeNode(attr)
+    }
+    for (const tag of ['pStyle', 'lvlPicBulletId']) {
+      for (const el of wChildren(lvlEl, tag)) lvlEl.removeChild(el)
+    }
+  }
+
+  return registerAbstractNum(numberingXml, abstractEl)
 }

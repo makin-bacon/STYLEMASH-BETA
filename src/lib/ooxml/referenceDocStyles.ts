@@ -1,6 +1,6 @@
 import type { ParsedDocx, StyleEntity, UserStyleRecord } from '../../types/ooxml'
-import { mergeParagraphStyle, mergeStyles, removeStyleById } from './mergeStyles'
-import { buildStylePreviewMarker, resolveStyleListFormat } from './numbering'
+import { findSameNamedStyleId, mergeParagraphStyle, mergeStyles, removeStyleById } from './mergeStyles'
+import { buildStylePreviewMarker, copyListDefinition, resolveStyleListFormat, resolveStyleNumPr } from './numbering'
 import { countOccurrencesForStyleId } from './styleReport'
 import { buildResolutionContext, buildStylesMap, getDocDefaultsRPr, resolveStyleRPr } from './styleResolution'
 import { trackedChildrenToSignature } from './signature'
@@ -21,11 +21,15 @@ import { buildThemeColorMap, resolveColorElement } from './themeColor'
  * A Document B style that's itself a paragraph style carrying list
  * numbering (its own <w:pPr>/<w:numPr>, or one inherited through its
  * w:basedOn chain - e.g. a "List Bullet"-alike) is materialized as a
- * paragraph-kind record with a freshly-created matching bullet/numbered
- * list in Document A (see resolveStyleListFormat/mergeParagraphStyle) - so
+ * paragraph-kind record carrying a copy of Document B's own list definition
+ * (copyListDefinition - so multilevel markers like "1.1" survive; a fresh
+ * single-level list only if the copy fails) - so
  * it shows its list marker immediately, the same as a manually-created list
  * style, rather than only once it happens to pick up its first merged
- * occurrence. Every other Document B style (the common case) still
+ * occurrence. A paragraph style that explicitly turns numbering off
+ * (numId="0", e.g. "Heading 2 No Numbering") is also materialized as a
+ * paragraph-kind, list-less record, so merging into it strips numbers.
+ * Every other Document B style (the common case) still
  * materializes as a character style, same as before: this app never tracks
  * paragraph-level properties besides list numbering, so a plain paragraph
  * style and a character style achieve the identical visible result for the
@@ -56,12 +60,16 @@ export function materializeReferenceDocStyles(
   const themeColorsB = buildThemeColorMap(referenceDocx.themeXml)
   const ctxB = buildResolutionContext(stylesMapB, getDocDefaultsRPr(referenceDocx.stylesXml), themeColorsB)
 
-  const existingByName = new Map(existingUserStyles.map((r) => [r.name, r]))
+  // Case-insensitive, matching how same-named document styles are found
+  // (findSameNamedStyleId) - "heading 1" and "Heading 1" are one style to Word.
+  const existingByName = new Map(existingUserStyles.map((r) => [r.name.toLowerCase(), r]))
   // Keyed by the *old* (reused) styleId, since mergeStyles()/
   // mergeParagraphStyle() always returns exactly that id back when
   // reuseExistingStyleId is passed.
   const replacements = new Map<string, UserStyleRecord>()
   const brandNew: UserStyleRecord[] = []
+  // Document B numId -> the numId of its copy in Document A (null: couldn't copy).
+  const copiedLists = new Map<string, string | null>()
 
   // Map insertion order == styles.xml document order (see buildStylesMap),
   // so genuinely-new records land in Document B's own style-definition
@@ -83,22 +91,51 @@ export function materializeReferenceDocStyles(
       listFormat === 'none'
         ? undefined
         : buildStylePreviewMarker(bStyleId, stylesMapB, referenceDocx.numberingXml)
+    const bNumPr = bStyle.type === 'paragraph' ? resolveStyleNumPr(bStyleId, stylesMapB) : null
+    // Any paragraph style that takes a position on numbering stays a
+    // paragraph style - including one that explicitly switches it off
+    // (numId="0", e.g. "Heading 2 No Numbering"), so merging a numbered
+    // paragraph into it actually removes the numbers.
+    const kind = bNumPr !== null ? 'paragraph' : 'character'
 
-    const collision = existingByName.get(bStyle.name)
+    // Carry Document B's real list definition across (once per B list, so
+    // styles that share a list in B - heading 1..9 - share one in A too),
+    // keeping multilevel numbering like "1.1" intact.
+    let listNumPr: { numId: string; ilvl: number } | undefined
+    if (listFormat !== 'none' && bNumPr && bNumPr !== 'off') {
+      let aNumId = copiedLists.get(bNumPr.numId)
+      if (aNumId === undefined) {
+        aNumId = copyListDefinition(targetDocx, referenceDocx.numberingXml, bNumPr.numId)
+        copiedLists.set(bNumPr.numId, aNumId)
+      }
+      if (aNumId !== null) listNumPr = { numId: aNumId, ilvl: bNumPr.ilvl }
+    }
+
+    const collision = existingByName.get(bStyle.name.toLowerCase())
+    const adopted = !collision && findSameNamedStyleId(targetDocx.stylesXml, bStyle.name, kind) !== null
     const newStyleId =
-      listFormat === 'none'
+      kind === 'character'
         ? mergeStyles(targetDocx, [], signature, bStyle.name, collision?.styleId)
-        : mergeParagraphStyle(targetDocx, [], signature, bStyle.name, listFormat, collision?.styleId)
+        : mergeParagraphStyle(
+            targetDocx,
+            [],
+            signature,
+            bStyle.name,
+            listFormat,
+            collision?.styleId,
+            listNumPr,
+          )
 
     const record: UserStyleRecord = {
       styleId: newStyleId,
       name: bStyle.name,
       targetSignature: signature,
-      kind: listFormat === 'none' ? 'character' : 'paragraph',
+      kind,
       listFormat,
       listPreviewText,
       createdAt: collision?.createdAt ?? Date.now(),
       fromReferenceDoc: true,
+      ...(adopted || collision?.adoptedFromDocument ? { adoptedFromDocument: true as const } : {}),
     }
 
     if (collision) {
@@ -137,7 +174,9 @@ export function reconcileUserStylesOnReferenceDocRemoval(
       const { fromReferenceDoc: _drop, ...rest } = record
       kept.push(rest)
     } else {
-      removeStyleById(stylesXml, record.styleId)
+      // A style adopted from the document itself is the document's own -
+      // only the record goes.
+      if (!record.adoptedFromDocument) removeStyleById(stylesXml, record.styleId)
       // record dropped entirely
     }
   }

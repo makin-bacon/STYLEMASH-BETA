@@ -144,7 +144,7 @@ describe('materializeReferenceDocStyles', () => {
     expect(byName('Heading 3').listPreviewText).toBe('1.1.1.')
   })
 
-  it('avoids clobbering a pre-existing style of the same name in Document A', () => {
+  it('takes over (redefines) a same-named style Document A already has, rather than adding a lookalike Word would fold into it', () => {
     const referenceDocx = makeParsedDocx({
       documentXml: `<w:document ${W}><w:body>
         <w:p><w:r><w:rPr><w:rStyle w:val="Emph"/></w:rPr><w:t>one</w:t></w:r></w:p>
@@ -163,15 +163,18 @@ describe('materializeReferenceDocStyles', () => {
     const records = materializeReferenceDocStyles(targetDocx, referenceDocx, [])
 
     expect(records).toHaveLength(1)
-    expect(records[0].styleId).not.toBe('Emph') // collision -> suffixed id via generateUniqueStyleId
+    expect(records[0].styleId).toBe('Emph')
+    expect(records[0].adoptedFromDocument).toBe(true)
 
     const stylesRoot = targetDocx.stylesXml.getElementsByTagNameNS(NS.w, 'styles')[0]
     const styleEls = Array.from(stylesRoot.getElementsByTagNameNS(NS.w, 'style'))
-    expect(styleEls).toHaveLength(2)
+    expect(styleEls).toHaveLength(1)
+    expect(styleEls[0].getElementsByTagNameNS(NS.w, 'b')).toHaveLength(1) // Document B's look
 
-    const originalEmph = styleEls.find((el) => wAttr(el, 'styleId') === 'Emph')!
-    expect(originalEmph.getElementsByTagNameNS(NS.w, 'i')).toHaveLength(1)
-    expect(originalEmph.getElementsByTagNameNS(NS.w, 'b')).toHaveLength(0) // untouched by the materialize step
+    // Removing Document B unused must not delete Document A's own style.
+    const kept = reconcileUserStylesOnReferenceDocRemoval(records, buildStyleReport(targetDocx), targetDocx.stylesXml)
+    expect(kept).toHaveLength(0)
+    expect(stylesRoot.getElementsByTagNameNS(NS.w, 'style')).toHaveLength(1)
   })
 
   it('resolves a materialized style\'s full basedOn/docDefaults cascade, not just its own direct rPr', () => {
