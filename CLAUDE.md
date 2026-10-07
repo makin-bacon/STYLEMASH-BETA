@@ -1444,3 +1444,22 @@ examples are history. About text, README and tests updated (134 pass).
 numbering now follows the target style, same-named styles are adopted, and
 clashing names get `_User` (see the three entries above). README and the
 About text carry no version string, so they needed no change.
+
+### 2026-10-07 - Floating-pill scrollbars
+*(branch `feature/floating-scrollbars`, merged into main)*
+
+Per request, scrollbars carried over from MIDI Boss so both projects match:
+a slim 4px pill floating on a transparent track (no buttons, no corner)
+that widens slightly and turns accent with a soft glow on hover/drag.
+`src/index.css` gains `--color-scroll-thumb`/`--color-scroll-thumb-hover`
+(light in `@theme`, dark in `.dark`) and a new Scrollbars section using
+`::-webkit-scrollbar`. Chrome ignores those pseudo-elements whenever
+`scrollbar-color`/`scrollbar-width` are set - `html` already sets
+`scrollbar-color` - so they're reset to `auto` inside
+`@supports selector(::-webkit-scrollbar)`; Firefox keeps a thin standard
+scrollbar in the same colours. No UI copy, tour step or label changed, so
+docs/walkthrough needed nothing. `npm run build`, `npm test` (134/134) and
+`npm run lint` (only the known `no-constant-binary-expression` warning)
+pass. Not checked visually in Chrome this time (the browser extension was
+disconnected); the served CSS was confirmed to contain the new rules. MIDI
+Boss keeps the same block in its `src/theme.css` - keep the two in sync.
