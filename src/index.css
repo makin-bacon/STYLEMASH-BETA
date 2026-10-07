@@ -8,7 +8,9 @@
 html {
   color-scheme: light;
   /* Text that sets no color of its own (e.g. document sample text with an
-     "auto" color) inherits this; scrollbars pick up the violet border tone. */
+     "auto" color) inherits this. Scrollbars: see the Scrollbars section
+     below (this scrollbar-color is reset there wherever ::-webkit-scrollbar
+     styling applies). */
   color: var(--color-ink);
   scrollbar-color: var(--color-line-strong) transparent;
 }
@@ -71,7 +73,7 @@ body {
    band; a literal, not derived); accent* = links, badges, hovers;
    select* = "picked" rows in Current styles; target* = the picked New
    Styles row; warn, flash, danger and the tag colors = status colors; quiet = secondary
-   buttons. The whole neutral scale is violet-tinted (hue ~285) so the UI
+   buttons; scroll-thumb* = scrollbar thumbs. The whole neutral scale is violet-tinted (hue ~285) so the UI
    reads as one dark-violet family; dark mode is near-black violet. Primary
    buttons use the stock violet-600/700 directly. */
 @theme {
@@ -122,6 +124,8 @@ body {
   --color-tag-pink-bg: #fdf4ff;
   --color-quiet: #5b4b80;
   --color-quiet-hover: #4a3c6b;
+  --color-scroll-thumb: color-mix(in oklab, var(--color-ink-5) 50%, transparent);
+  --color-scroll-thumb-hover: color-mix(in oklab, var(--color-accent) 75%, transparent);
 }
 
 .dark {
@@ -169,6 +173,58 @@ body {
   --color-tag-pink-bg: #4a044e;
   --color-quiet: #3a2966;
   --color-quiet-hover: #4a3380;
+  --color-scroll-thumb: color-mix(in oklab, var(--color-ink-5) 55%, transparent);
+  --color-scroll-thumb-hover: color-mix(in oklab, var(--color-accent) 80%, transparent);
+}
+
+/* ---- Scrollbars ---------------------------------------------------- */
+
+/* A slim floating pill on a transparent track (no buttons, no corner),
+   turning accent with a soft glow on hover/drag; light/dark via the
+   scroll-thumb tokens. Chrome ignores ::-webkit-scrollbar whenever
+   scrollbar-color/scrollbar-width are set (html sets scrollbar-color above),
+   so those are reset to auto wherever the pseudo-elements are supported.
+   Firefox can't draw the pill and keeps a thin standard scrollbar in the
+   same colours. Shared with MIDI Boss's theme.css - keep the two in sync. */
+@supports selector(::-webkit-scrollbar) {
+  html,
+  html * {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-scroll-thumb);
+    background-clip: padding-box;
+    border: 4px solid transparent; /* leaves a 4px pill floating in the gutter */
+    border-radius: 999px;
+    min-height: 40px;
+  }
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--color-scroll-thumb-hover);
+    border-width: 3px; /* widens to 6px */
+    box-shadow: inset 0 0 6px color-mix(in oklab, var(--color-accent) 35%, transparent);
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  html,
+  html * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scroll-thumb) transparent;
+  }
 }
 
 /* ---- Theme switch -------------------------------------------------- */
